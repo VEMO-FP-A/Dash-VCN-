@@ -1,0 +1,2097 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VCN Financial Performance · VEMO</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root {
+  --teal: #11ABAB;
+  --forest: #1F5556;
+  --gray: #A6A6A6;
+  --light: #F2F2F2;
+  --white: #FFFFFF;
+  --text: #1a2424;
+  --text2: #4a6060;
+  --text3: #8a9a9a;
+  --red: #c0392b;
+  --green: #1a7a4a;
+  --border: rgba(31,85,86,0.12);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: 'Space Grotesk', sans-serif; background: var(--light); color: var(--text); min-height: 100vh; }
+
+/* ── SIDEBAR — exact PPT style ── */
+.sidebar {
+  position: fixed; left: 0; top: 0; bottom: 0; width: 28px;
+  background: var(--teal); z-index: 100;
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: space-between; padding: 20px 0;
+}
+.sidebar-label {
+  font-family: 'Space Grotesk', sans-serif; font-size: 8px; font-weight: 700;
+  color: #fff; letter-spacing: 0.22em; text-transform: uppercase;
+  writing-mode: vertical-rl; transform: rotate(180deg);
+}
+.sidebar-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--forest); }
+.sidebar-bottom { font-size: 7px; color: rgba(255,255,255,0.6); writing-mode: vertical-rl; transform: rotate(180deg); letter-spacing: 0.12em; text-transform: uppercase; }
+
+/* ── LAYOUT ── */
+.page { margin-left: 28px; padding: 0 40px 60px 40px; max-width: 1280px; }
+
+/* ── HEADER ── */
+.page-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 24px 0 20px; border-bottom: 1px solid rgba(31,85,86,0.15);
+  margin-bottom: 28px; flex-wrap: wrap; gap: 12px;
+}
+.header-left { display: flex; align-items: center; gap: 14px; }
+.vemo-wordmark {
+  font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 800;
+  color: var(--forest); letter-spacing: 0.06em;
+}
+.header-divider { width: 1px; height: 28px; background: rgba(31,85,86,0.2); }
+.header-subtitle { font-size: 12px; color: var(--text2); font-weight: 500; }
+.header-right { display: flex; align-items: center; gap: 10px; }
+.badge-period {
+  font-size: 11px; color: var(--teal); background: rgba(17,171,171,0.08);
+  border: 1px solid rgba(17,171,171,0.3); border-radius: 20px; padding: 5px 14px; font-weight: 500;
+}
+.badge-conf {
+  font-size: 9px; color: var(--text3); border: 1px solid var(--gray);
+  border-radius: 3px; padding: 4px 10px; letter-spacing: 0.1em; text-transform: uppercase;
+}
+
+/* ── SECTION HEADING — matches pptx table headers ── */
+.section-head {
+  background: var(--forest); color: #fff;
+  font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 700;
+  padding: 10px 18px; border-radius: 5px;
+  margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between;
+}
+.section-head-light {
+  border-left: 4px solid var(--teal); padding: 8px 14px;
+  font-family: 'Space Grotesk', sans-serif; font-size: 12px; font-weight: 700;
+  color: var(--forest); margin-bottom: 16px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.section-note { font-size: 10px; color: var(--text3); font-weight: 400; font-family: 'Space Grotesk', sans-serif; }
+
+/* ── GLOBAL PERIOD SELECTOR ── */
+#global-period-bar {
+  display: flex; align-items: center; gap: 4px; flex-wrap: wrap;
+  margin-bottom: 16px; background: var(--white);
+  border: 1px solid rgba(31,85,86,0.15); border-radius: 8px;
+  padding: 8px 12px;
+}
+.gp-btn {
+  font-family: 'Space Grotesk', sans-serif; font-size: 11px; font-weight: 600;
+  padding: 6px 14px; border-radius: 5px; border: 1px solid rgba(31,85,86,0.2);
+  background: transparent; color: var(--text2); cursor: pointer; transition: all 0.12s;
+  white-space: nowrap;
+}
+.gp-btn:hover { border-color: var(--teal); color: var(--teal); }
+.gp-btn.active { background: var(--forest); color: #fff; border-color: var(--forest); }
+.gp-btn.active-month { background: var(--teal); color: #fff; border-color: var(--teal); }
+.gp-btn.active-latest { background: var(--teal); color: #fff; border-color: var(--teal); }
+.gp-sep { width: 1px; height: 20px; background: rgba(31,85,86,0.15); margin: 0 6px; flex-shrink:0; }
+#gp-month-btns { display: flex; flex-wrap: wrap; gap: 4px; }
+
+#budget-period-bar {
+  display: flex; align-items: center; gap: 4px; flex-wrap: wrap;
+  margin-bottom: 16px; background: var(--white);
+  border: 1px solid rgba(31,85,86,0.15); border-radius: 8px;
+  padding: 8px 12px;
+}
+
+/* ── KPI GRID ── */
+.kpi-grid {
+  display: grid; grid-template-columns: repeat(3, minmax(0,1fr));
+  gap: 0; border: 1px solid rgba(31,85,86,0.15); border-radius: 6px;
+  overflow: visible; background: rgba(31,85,86,0.08); margin-bottom: 28px;
+}
+.kpi-card {
+  background: var(--white); padding: 18px 16px;
+  position: relative; transition: background 0.15s;
+  border-right: 1px solid rgba(31,85,86,0.1);
+  border-bottom: 1px solid rgba(31,85,86,0.1);
+}
+.kpi-card:nth-child(3n) { border-right: none; }
+.kpi-card:nth-child(4), .kpi-card:nth-child(5), .kpi-card:nth-child(6) { border-bottom: none; }
+.kpi-card:hover { background: rgba(17,171,171,0.04); }
+.kpi-card:first-child { border-radius: 6px 0 0 0; }
+.kpi-card:nth-child(3) { border-radius: 0 6px 0 0; }
+.kpi-card:nth-child(4) { border-radius: 0 0 0 6px; }
+.kpi-card:last-child { border-radius: 0 0 6px 0; }
+
+/* ── ACTUAL VS BUDGET KPI ── */
+.kpi-avb { display:flex; flex-direction:column; gap:0; }
+.kpi-avb-row { display:flex; align-items:center; justify-content:space-between; gap:6px; padding:5px 0; border-bottom:0.5px solid rgba(31,85,86,0.08); }
+.kpi-avb-row:last-child { border-bottom:none; }
+.kpi-avb-lbl { font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:0.07em; min-width:44px; flex-shrink:0; }
+.kpi-avb-lbl.actual { color:#1FF1B0; }
+.kpi-avb-lbl.budget { color:var(--gray); }
+.kpi-avb-val { font-family:'Space Grotesk',sans-serif; font-size:17px; font-weight:800; line-height:1; }
+.kpi-avb-right { display:flex; flex-direction:column; align-items:flex-end; gap:2px; }
+.kpi-var-pill { font-size:10px; font-weight:700; padding:2px 7px; border-radius:3px; }
+.kpi-var-pill.pos { color:var(--green); background:rgba(26,122,74,0.09); }
+.kpi-var-pill.neg { color:var(--red); background:rgba(192,57,43,0.09); }
+.kpi-var-pill.neu { color:var(--text3); background:rgba(31,85,86,0.06); }
+.kpi-avb-delta { font-size:9px; color:var(--text3); }
+
+.kpi-name { font-size: 10px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 2px; }
+.kpi-adj-note { font-size: 9px; color: var(--gray); margin-bottom: 8px; }
+.kpi-pills { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 10px; }
+.kpi-pill {
+  font-size: 10px; padding: 3px 9px; border-radius: 20px;
+  border: 1px solid rgba(31,85,86,0.2); background: transparent;
+  color: var(--text2); cursor: pointer; font-family: 'Space Grotesk', sans-serif; transition: all 0.12s;
+}
+.kpi-pill:hover { border-color: var(--teal); color: var(--teal); }
+.kpi-pill.active { background: var(--teal); border-color: var(--teal); color: #fff; font-weight: 700; }
+.kpi-value { font-family: 'Space Grotesk', sans-serif; font-size: 28px; font-weight: 800; color: var(--forest); line-height: 1; margin-bottom: 4px; }
+.kpi-value.neg { color: var(--red); }
+.kpi-value.pos { color: var(--teal); }
+.kpi-period { font-size: 11px; color: var(--text3); margin-bottom: 8px; }
+.kpi-deltas { display: flex; gap: 10px; flex-wrap: wrap; }
+.kdelta { font-size: 11px; display: flex; align-items: center; gap: 3px; }
+.kdelta-lbl { color: var(--text3); }
+.kdelta-val { font-weight: 700; }
+.kdelta-val.up { color: var(--green); }
+.kdelta-val.dn { color: var(--red); }
+.kdelta-val.neu { color: var(--text2); }
+.month-popup {
+  position: absolute; top: calc(100% - 10px); left: 0; z-index: 200;
+  background: var(--white); border: 1px solid rgba(31,85,86,0.2);
+  border-radius: 8px; padding: 10px; min-width: 220px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+  display: none; flex-wrap: wrap; gap: 4px;
+}
+.month-popup.open { display: flex; }
+.mo-btn {
+  font-size: 10px; padding: 4px 8px; border-radius: 4px;
+  border: 1px solid rgba(31,85,86,0.15); background: transparent;
+  color: var(--text2); cursor: pointer; font-family: 'Space Grotesk', sans-serif; transition: all 0.1s;
+}
+.mo-btn:hover { background: rgba(17,171,171,0.08); color: var(--teal); border-color: var(--teal); }
+.mo-btn.active { background: var(--teal); color: #fff; border-color: var(--teal); font-weight: 700; }
+
+/* ── DIVIDER ── */
+.divider { border: none; border-top: 1px solid rgba(31,85,86,0.12); margin: 28px 0; }
+
+/* ── COMPARISON CARDS ── */
+.comp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 28px; }
+.comp-card { background: var(--white); border: 1px solid rgba(31,85,86,0.15); border-radius: 6px; overflow: hidden; }
+.comp-card-head {
+  background: var(--forest); color: #fff; padding: 10px 16px;
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+}
+.comp-card-title { font-family: 'Space Grotesk', sans-serif; font-size: 12px; font-weight: 700; }
+.comp-selectors { display: flex; align-items: center; gap: 6px; }
+.comp-selectors select {
+  font-family: 'Space Grotesk', sans-serif; font-size: 10px;
+  background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 4px; padding: 3px 7px; cursor: pointer;
+}
+.comp-selectors select option { background: var(--forest); color: #fff; }
+.comp-body { padding: 12px 16px; }
+.comp-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 7px 0; border-bottom: 1px solid rgba(31,85,86,0.08); font-size: 12px;
+}
+.comp-row:last-child { border-bottom: none; }
+.comp-name { color: var(--text2); font-weight: 500; }
+.comp-vals { display: flex; align-items: center; gap: 10px; }
+.comp-base { color: var(--text); font-variant-numeric: tabular-nums; font-weight: 700; }
+.comp-delta { font-size: 11px; color: var(--text3); font-variant-numeric: tabular-nums; }
+.comp-pct { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 3px; font-variant-numeric: tabular-nums; }
+.comp-pct.pos { color: var(--green); background: rgba(26,122,74,0.08); }
+.comp-pct.neg { color: var(--red); background: rgba(192,57,43,0.08); }
+.comp-pct.neu { color: var(--text3); background: rgba(31,85,86,0.06); }
+
+/* ── TABS ── */
+.tab-bar {
+  display: flex; gap: 2px; margin-bottom: 24px;
+  background: rgba(31,85,86,0.06); border: 1px solid rgba(31,85,86,0.15);
+  border-radius: 6px; padding: 4px; width: fit-content;
+}
+.tab-btn {
+  font-family: 'Space Grotesk', sans-serif; font-size: 12px; font-weight: 500;
+  padding: 7px 20px; border-radius: 4px; border: none; background: transparent;
+  color: var(--text2); cursor: pointer; transition: all 0.12s;
+}
+.tab-btn:hover { color: var(--forest); }
+.tab-btn.active { background: var(--forest); color: #fff; }
+
+/* ── CHARTS SECTION ── */
+.charts-big-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+.chart-card { background: var(--white); border: 1px solid rgba(31,85,86,0.15); border-radius: 6px; overflow: hidden; }
+.chart-card-head { background: var(--teal); color: #fff; padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; }
+.chart-card-title { font-family: 'Space Grotesk', sans-serif; font-size: 12px; font-weight: 700; }
+.chart-card-kpi { font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 800; }
+.chart-card-body { padding: 12px 16px; }
+.chart-card-canvas { position: relative; width: 100%; height: 160px; }
+.chart-card-legend { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
+.chart-legend-item { display: flex; align-items: center; gap: 5px; font-size: 10px; color: var(--text2); cursor: pointer; padding: 3px 6px; border-radius: 3px; transition: background 0.1s; }
+.chart-legend-item:hover { background: rgba(17,171,171,0.08); }
+.chart-legend-item.hidden { opacity: 0.35; text-decoration: line-through; }
+.legend-line { width: 16px; height: 2.5px; border-radius: 2px; display: inline-block; }
+
+/* full-width chart card */
+.chart-card-full { background: var(--white); border: 1px solid rgba(31,85,86,0.15); border-radius: 6px; overflow: hidden; margin-bottom: 16px; }
+.chart-card-full .chart-card-head { background: var(--forest); }
+.chart-card-full-body { padding: 16px 20px; }
+.chart-card-full-canvas { position: relative; width: 100%; height: 200px; }
+
+/* sparkline chart blocks (P&L lines section) */
+.sparklines-grid { display: flex; flex-direction: column; gap: 0; }
+.spark-block {
+  background: var(--white); border-bottom: 1px solid rgba(31,85,86,0.1);
+  padding: 14px 16px 12px; cursor: pointer; transition: background 0.12s;
+}
+.spark-block:first-child { border-radius: 6px 6px 0 0; border: 1px solid rgba(31,85,86,0.15); border-bottom: 1px solid rgba(31,85,86,0.1); }
+.spark-block:last-child { border-radius: 0 0 6px 6px; border: 1px solid rgba(31,85,86,0.15); border-top: none; }
+.spark-block:not(:first-child):not(:last-child) { border-left: 1px solid rgba(31,85,86,0.15); border-right: 1px solid rgba(31,85,86,0.15); }
+.spark-block:hover { background: rgba(17,171,171,0.04); }
+.spark-block.is-open { background: rgba(17,171,171,0.05); }
+.spark-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 8px; }
+.spark-meta { display: flex; flex-direction: column; gap: 2px; min-width: 200px; }
+.spark-name { font-size: 10px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 0.07em; }
+.spark-kpi { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 800; color: var(--forest); }
+.spark-kpi .neg { color: var(--red); }
+.spark-kpi .pos { color: var(--teal); }
+.spark-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.spark-ytd { font-size: 11px; color: var(--text3); text-align: right; }
+.spark-ytd span { display: block; font-weight: 700; color: var(--text2); font-size: 12px; }
+.spark-hint { font-size: 10px; color: var(--teal); opacity: 0; transition: opacity 0.12s; font-weight: 500; }
+.spark-block:hover .spark-hint { opacity: 1; }
+.spark-block.is-open .spark-hint { opacity: 0; }
+.spark-canvas { position: relative; width: 100%; height: 80px; }
+
+/* drill panel — pptx style */
+.drill-panel {
+  display: none;
+  background: rgba(17,171,171,0.04);
+  border: 1px solid rgba(17,171,171,0.25);
+  border-radius: 0 0 6px 6px;
+  padding: 16px 18px; margin-bottom: 4px;
+}
+.drill-head { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px; }
+.drill-title { font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 700; color: var(--forest); }
+.drill-meta { font-size: 10px; color: var(--text3); margin-top: 3px; }
+.drill-meta span { color: var(--teal); font-weight: 500; }
+.drill-close { font-size: 11px; color: var(--text2); cursor: pointer; border: 1px solid rgba(31,85,86,0.2); border-radius: 4px; padding: 3px 10px; background: transparent; font-family: 'Space Grotesk'; font-weight: 500; transition: all 0.12s; }
+.drill-close:hover { border-color: var(--teal); color: var(--teal); background: rgba(17,171,171,0.06); }
+.drill-legend { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.dl-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text2); cursor: pointer; padding: 4px 10px 4px 6px; border-radius: 4px; border: 1px solid rgba(31,85,86,0.12); background: #fff; transition: all 0.1s; }
+.dl-item:hover { border-color: var(--teal); background: rgba(17,171,171,0.06); }
+.dl-dot { width: 14px; height: 2.5px; border-radius: 2px; display: inline-block; }
+.drill-canvas-wrap { position: relative; width: 100%; }
+
+/* ── TABLE ── */
+.tbl-outer { overflow-x: auto; border: 1px solid rgba(31,85,86,0.15); border-radius: 6px; background: var(--white); }
+table { border-collapse: collapse; font-size: 12px; min-width: 960px; width: 100%; }
+thead th {
+  padding: 9px 12px; font-size: 10px; font-weight: 700; text-align: right;
+  white-space: nowrap; background: var(--forest); color: #fff; letter-spacing: 0.04em;
+}
+thead th:first-child { text-align: left; position: sticky; left: 0; z-index: 3; min-width: 190px; background: var(--forest); }
+thead th.y25 { border-bottom: 2px solid var(--teal); }
+thead th.y26 { border-bottom: 2px solid rgba(17,171,171,0.5); }
+tbody td { padding: 7px 12px; text-align: right; white-space: nowrap; border-bottom: 1px solid rgba(31,85,86,0.07); font-variant-numeric: tabular-nums; color: var(--text); font-size: 12px; }
+tbody td:first-child { text-align: left; position: sticky; left: 0; background: var(--white); z-index: 1; }
+tr.rparent td:first-child { cursor: pointer; }
+tr.rparent:hover td { background: rgba(17,171,171,0.05); }
+tr.rparent:hover td:first-child { background: rgba(17,171,171,0.05); }
+tr.rtotal td { font-weight: 700; background: rgba(17,171,171,0.08); }
+tr.rtotal td:first-child { background: rgba(17,171,171,0.08); }
+tr.rsubtot td { font-weight: 700; background: rgba(31,85,86,0.05); }
+tr.rsubtot td:first-child { background: rgba(31,85,86,0.05); }
+tr.rsec td { font-size: 10px; font-weight: 700; color: var(--white); text-transform: uppercase; letter-spacing: 0.07em; padding-top: 0; padding-bottom: 0; height: 30px; background: var(--teal); border-bottom: none; }
+tr.rsec td:first-child { background: var(--teal); }
+tr.rchild td { font-size: 11px; color: var(--text2); background: rgba(17,171,171,0.03); }
+tr.rchild td:first-child { background: rgba(17,171,171,0.03); padding-left: 34px; }
+tr.rchild-hide { display: none; }
+.xicon { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 3px; background: rgba(17,171,171,0.12); color: var(--teal); font-size: 11px; margin-right: 6px; flex-shrink: 0; font-weight: 700; }
+.rl { display: flex; align-items: center; }
+.tneg { color: var(--red) !important; }
+.tpos { color: var(--green) !important; }
+.tzero { color: var(--gray) !important; }
+
+/* ── STICKY NAV BAR ── */
+.dash-nav {
+  position: sticky; top: 0; z-index: 90;
+  background: var(--white);
+  border-bottom: 1px solid rgba(31,85,86,0.15);
+  display: flex; align-items: center; gap: 2px;
+  padding: 0 16px 0 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  margin: 0 -40px 28px; /* bleed to page edges */
+  padding-left: 40px;
+}
+.dash-nav-btn {
+  font-family: 'Space Grotesk', sans-serif; font-size: 12px; font-weight: 600;
+  color: var(--text2); background: transparent; border: none;
+  padding: 14px 18px; cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all 0.15s; white-space: nowrap;
+  text-decoration: none; display: inline-block;
+}
+.dash-nav-btn:hover { color: var(--teal); }
+.dash-nav-btn.active { color: var(--forest); border-bottom-color: var(--teal); }
+.dash-nav-divider { width: 1px; height: 20px; background: rgba(31,85,86,0.12); margin: 0 4px; flex-shrink: 0; }
+.footer {
+  margin-top: 40px; padding: 16px 0;
+  border-top: 1px solid rgba(31,85,86,0.15);
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+}
+.footer-left { font-size: 10px; color: var(--text3); }
+.footer-right { display: flex; align-items: center; gap: 12px; }
+.footer-note { font-size: 10px; color: var(--text3); }
+.footer-conf { font-size: 9px; color: var(--text3); border: 1px solid var(--gray); border-radius: 3px; padding: 3px 9px; letter-spacing: 0.1em; text-transform: uppercase; }
+
+@keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+.fade-in { animation: fadeIn 0.4s ease forwards; }
+
+@media(max-width:900px){
+  .kpi-grid { grid-template-columns: repeat(2,1fr); }
+  .comp-grid, .charts-big-grid { grid-template-columns: 1fr; }
+  .page { padding: 0 16px 40px 16px; }
+}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR — exact PPT bar -->
+<div class="sidebar">
+  <div class="sidebar-label">VEMO · VCN</div>
+  <div class="sidebar-dot"></div>
+  <div class="sidebar-bottom">Strictly Private &amp; Confidential</div>
+</div>
+
+<div class="page">
+
+  <!-- HEADER -->
+  <header class="page-header">
+    <div class="header-left">
+      <div class="vemo-wordmark">VEMO</div>
+      <div class="header-divider"></div>
+      <div class="header-subtitle">VCN — Financial Performance Report</div>
+    </div>
+    <div class="header-right">
+      <span class="badge-period">Ene 2025 – Abr 2026</span>
+      <span class="badge-conf">Confidencial</span>
+    </div>
+  </header>
+
+  <!-- STICKY NAV -->
+  <nav class="dash-nav" id="dash-nav">
+    <a class="dash-nav-btn active" onclick="navTo('sec-ops')">⚡ Métricas Ops</a>
+    <div class="dash-nav-divider"></div>
+    <a class="dash-nav-btn" onclick="navTo('sec-resumen')">📊 Resumen Ejecutivo</a>
+    <a class="dash-nav-btn" onclick="navTo('sec-variacion')">📈 Variación MoM / YoY</a>
+    <div class="dash-nav-divider"></div>
+    <a class="dash-nav-btn" onclick="navTo('sec-graficas');showView('graficas')">Gráficas</a>
+    <a class="dash-nav-btn" onclick="navTo('sec-graficas');showView('pl')">P&L Mensual</a>
+    <a class="dash-nav-btn" onclick="navTo('sec-graficas');showView('tabla')">Tabla Detalle</a>
+    <div class="dash-nav-divider"></div>
+    <a class="dash-nav-btn" onclick="navTo('sec-budget')">💰 Budget 2026</a>
+  </nav>
+  <!-- ══ MÉTRICAS OPERACIONALES ══ -->
+  <div id="view-ops">
+    <div id="sec-ops" style="scroll-margin-top:60px;"></div>
+
+    <div style="margin: 48px 0 32px; display:flex; align-items:center; gap:16px;">
+      <div style="flex:1; height:1px; background:linear-gradient(to right, rgba(31,85,86,0.3), rgba(31,85,86,0.05));"></div>
+      <div style="background:var(--teal);color:#fff;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;padding:10px 24px;border-radius:6px;letter-spacing:0.06em;text-transform:uppercase;white-space:nowrap;">
+        ⚡ Métricas Operacionales
+      </div>
+      <div style="flex:1; height:1px; background:linear-gradient(to left, rgba(31,85,86,0.3), rgba(31,85,86,0.05));"></div>
+    </div>
+
+    <!-- Resumen de métricas -->
+    <div class="section-head" style="margin-bottom:16px;">
+      Resumen de Métricas — Abr 2026
+      <span class="section-note">Active para 1–6 · Total para 7–14</span>
+    </div>
+    <div id="ops-summary-grid" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;border:1px solid rgba(31,85,86,0.15);border-radius:6px;overflow:hidden;background:rgba(31,85,86,0.08);margin-bottom:16px;"></div>
+
+    <!-- Chart panel that opens when a card is clicked -->
+    <div id="ops-chart-panel" style="display:none;background:var(--white);border:1px solid rgba(31,85,86,0.15);border-radius:6px;overflow:hidden;margin-bottom:28px;">
+      <div id="ops-chart-head" style="background:var(--teal);color:#fff;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;">
+        <div id="ops-chart-title" style="font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;"></div>
+        <button onclick="closeOpsChart()" style="background:rgba(255,255,255,0.15);border:none;color:#fff;border-radius:4px;padding:3px 10px;cursor:pointer;font-size:11px;font-family:'Space Grotesk',sans-serif;">✕ cerrar</button>
+      </div>
+      <div style="padding:16px 20px;">
+        <div style="position:relative;width:100%;height:260px;"><canvas id="ops-chart-canvas"></canvas></div>
+        <div id="ops-chart-legend" style="display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;"></div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Ops table -->
+    <div class="tbl-outer"><table id="ops-tbl"></table></div>
+
+  <!-- ══ RESUMEN EJECUTIVO ══ -->
+  <div id="sec-resumen" style="scroll-margin-top:60px;"></div>
+
+  <div style="margin: 48px 0 32px; display:flex; align-items:center; gap:16px;">
+    <div style="flex:1; height:1px; background:linear-gradient(to right, rgba(31,85,86,0.3), rgba(31,85,86,0.05));"></div>
+    <div style="background:var(--teal);color:#fff;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;padding:10px 24px;border-radius:6px;letter-spacing:0.06em;text-transform:uppercase;white-space:nowrap;">
+      📊 Resumen Ejecutivo
+    </div>
+    <div style="flex:1; height:1px; background:linear-gradient(to left, rgba(31,85,86,0.3), rgba(31,85,86,0.05));"></div>
+  </div>
+
+  <!-- GLOBAL PERIOD SELECTOR -->
+  <div id="global-period-bar">
+    <button class="gp-btn active" onclick="setGlobalPeriod('fy25')">FY 2025</button>
+    <button class="gp-btn" onclick="setGlobalPeriod('ytd26')">YTD 2026</button>
+    <div class="gp-sep"></div>
+    <div style="position:relative;">
+      <button class="gp-btn" id="gp-mes-btn" onclick="toggleGpMonthPopup();event.stopPropagation()">Mes ▾</button>
+      <div id="gp-month-popup" style="display:none;position:absolute;top:calc(100% + 6px);left:0;z-index:200;background:#fff;border:1px solid rgba(31,85,86,0.2);border-radius:8px;padding:10px;min-width:220px;box-shadow:0 4px 24px rgba(0,0,0,0.12);flex-wrap:wrap;gap:4px;">
+        <div id="gp-month-btns"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="kpi-grid fade-in" id="kpi-grid"></div>
+
+  <div class="divider"></div>
+
+  <!-- ══ VARIACIÓN MOM / YOY ══ -->
+  <div id="sec-variacion" style="scroll-margin-top:60px;"></div>
+
+  <div style="margin: 48px 0 32px; display:flex; align-items:center; gap:16px;">
+    <div style="flex:1; height:1px; background:linear-gradient(to right, rgba(31,85,86,0.3), rgba(31,85,86,0.05));"></div>
+    <div style="background:var(--teal);color:#fff;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;padding:10px 24px;border-radius:6px;letter-spacing:0.06em;text-transform:uppercase;white-space:nowrap;">
+      📈 Variación Mensual y Anual
+    </div>
+    <div style="flex:1; height:1px; background:linear-gradient(to left, rgba(31,85,86,0.3), rgba(31,85,86,0.05));"></div>
+  </div>
+  <div class="comp-grid">
+    <div class="comp-card">
+      <div class="comp-card-head">
+        <div class="comp-card-title">Mes vs Mes</div>
+        <div class="comp-selectors">
+          <select id="mom-cur" onchange="buildComparisons()"></select>
+          <span style="font-size:10px;opacity:0.7;">vs</span>
+          <select id="mom-prev" onchange="buildComparisons()"></select>
+        </div>
+      </div>
+      <div class="comp-body" id="mom-table"></div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-card-head">
+        <div class="comp-card-title">Año vs Año</div>
+        <div class="comp-selectors">
+          <select id="yoy-cur" onchange="buildComparisons()"></select>
+          <span style="font-size:10px;opacity:0.7;">vs</span>
+          <select id="yoy-prev" onchange="buildComparisons()"></select>
+        </div>
+      </div>
+      <div class="comp-body" id="yoy-table"></div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ══ TABS ══ -->
+  <div id="sec-graficas" style="scroll-margin-top:60px;"></div>
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="showView('graficas')">Gráficas</button>
+    <button class="tab-btn" onclick="showView('pl')">P&L Mensual</button>
+    <button class="tab-btn" onclick="showView('tabla')">Tabla Detalle</button>
+  </div>
+
+  <!-- ══ GRÁFICAS ══ -->
+  <div id="view-graficas">
+    <div class="section-head" style="margin-bottom:16px;">
+      Gráficas P&L — Ene 2025 a Abr 2026
+      <span class="section-note">MXN Millones · clic en leyenda para mostrar/ocultar líneas</span>
+    </div>
+
+    <!-- Row 1: Revenue + COGS -->
+    <div class="charts-big-grid">
+      <div class="chart-card">
+        <div class="chart-card-head" style="background:var(--teal);">
+          <div class="chart-card-title">Revenue</div>
+          <div class="chart-card-kpi" id="g-rev-kpi"></div>
+        </div>
+        <div class="chart-card-body">
+          <div class="chart-card-canvas"><canvas id="g-rev"></canvas></div>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-head" style="background:var(--forest);">
+          <div class="chart-card-title">COGS</div>
+          <div class="chart-card-kpi" id="g-cogs-kpi"></div>
+        </div>
+        <div class="chart-card-body">
+          <div class="chart-card-canvas"><canvas id="g-cogs"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 2: Opex + Gross Profit -->
+    <div class="charts-big-grid">
+      <div class="chart-card">
+        <div class="chart-card-head" style="background:var(--forest);">
+          <div class="chart-card-title">Opex</div>
+          <div class="chart-card-kpi" id="g-opex-kpi"></div>
+        </div>
+        <div class="chart-card-body">
+          <div class="chart-card-canvas"><canvas id="g-opex"></canvas></div>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-head" style="background:var(--forest);">
+          <div class="chart-card-title">Gross Profit &amp; Margen %</div>
+          <div class="chart-card-kpi" id="g-gp-kpi"></div>
+        </div>
+        <div class="chart-card-body">
+          <div class="chart-card-canvas"><canvas id="g-gp"></canvas></div>
+          <div class="chart-card-legend" id="g-gp-legend"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 3: SGA + Corp -->
+    <div class="charts-big-grid">
+      <div class="chart-card">
+        <div class="chart-card-head" style="background:var(--forest);">
+          <div class="chart-card-title">SG&amp;A</div>
+          <div class="chart-card-kpi" id="g-sga-kpi"></div>
+        </div>
+        <div class="chart-card-body">
+          <div class="chart-card-canvas"><canvas id="g-sga"></canvas></div>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-head" style="background:var(--forest);">
+          <div class="chart-card-title">Corp (Cross SG&amp;A + Corp G&amp;A + Corp Bonus)</div>
+          <div class="chart-card-kpi" id="g-corp-kpi"></div>
+        </div>
+        <div class="chart-card-body">
+          <div class="chart-card-canvas"><canvas id="g-corp"></canvas></div>
+          <div class="chart-card-legend" id="g-corp-legend"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 4: EBITDA + EBITDA adj -->
+    <div class="charts-big-grid">
+      <div class="chart-card">
+        <div class="chart-card-head" style="background:var(--teal);">
+          <div class="chart-card-title">EBITDA</div>
+          <div class="chart-card-kpi" id="g-ebitda-kpi"></div>
+        </div>
+        <div class="chart-card-body">
+          <div class="chart-card-canvas"><canvas id="g-ebitda"></canvas></div>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-head" style="background:var(--teal);">
+          <div class="chart-card-title">EBITDA ex. Cross &amp; Corp SG&amp;A</div>
+          <div class="chart-card-kpi" id="g-ebitdaadj-kpi"></div>
+        </div>
+        <div class="chart-card-body">
+          <div class="chart-card-canvas"><canvas id="g-ebitdaadj"></canvas></div>
+          <div class="chart-card-legend" id="g-ebitdaadj-legend"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 5: Net Income + Net Income adj -->
+    <div class="charts-big-grid">
+      <div class="chart-card">
+        <div class="chart-card-head" style="background:var(--forest);">
+          <div class="chart-card-title">Net Income</div>
+          <div class="chart-card-kpi" id="g-ni-kpi"></div>
+        </div>
+        <div class="chart-card-body">
+          <div class="chart-card-canvas"><canvas id="g-ni"></canvas></div>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-head" style="background:var(--forest);">
+          <div class="chart-card-title">Net Income ex. Non-Operating Rev/(Exp)</div>
+          <div class="chart-card-kpi" id="g-niadj-kpi"></div>
+        </div>
+        <div class="chart-card-body">
+          <div class="chart-card-canvas"><canvas id="g-niadj"></canvas></div>
+          <div class="chart-card-legend" id="g-niadj-legend"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══ P&L MENSUAL (sparklines con drill) ══ -->
+  <div id="view-pl" style="display:none;">
+    <div class="section-head" style="margin-bottom:16px;">
+      P&amp;L Mensual — Ene 2025 a Abr 2026
+      <span class="section-note">MXN Millones · clic en leyenda para mostrar/ocultar</span>
+    </div>
+    <div class="sparklines-grid" id="charts-wrap"></div>
+  </div>
+
+  <!-- ══ TABLA DETALLE ══ -->
+  <div id="view-tabla" style="display:none;">
+    <div class="section-head" style="margin-bottom:16px;">
+      Estado de Resultados Completo — Ene 2025 a Abr 2026
+      <span class="section-note">MXN Millones · + para expandir desglose</span>
+    </div>
+    <div class="tbl-outer"><table id="pl-tbl"></table></div>
+  </div>
+
+  <!-- ══ TABLA DETALLE ══ -->
+  <div id="view-tabla" style="display:none;">
+    <div class="section-head" style="margin-bottom:16px;">
+      Estado de Resultados Completo — Ene 2025 a Abr 2026
+      <span class="section-note">MXN Millones · + para expandir desglose</span>
+    </div>
+    <div class="tbl-outer"><table id="pl-tbl"></table></div>
+  </div>
+
+  <!-- ══ BUDGET 2026 ══ -->
+  <div id="view-budget">
+
+    <!-- Big section break between dashboards -->
+    <div id="sec-budget" style="scroll-margin-top:60px; position:absolute; margin-top:-60px;"></div>
+    <div style="margin: 48px 0 32px; display:flex; align-items:center; gap:16px;">
+      <div style="flex:1; height:1px; background:linear-gradient(to right, rgba(31,85,86,0.3), rgba(31,85,86,0.05));"></div>
+      <div style="background:var(--teal);color:#fff;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;padding:10px 24px;border-radius:6px;letter-spacing:0.06em;text-transform:uppercase;white-space:nowrap;">
+        📊 Budget 2026
+      </div>
+      <div style="flex:1; height:1px; background:linear-gradient(to left, rgba(31,85,86,0.3), rgba(31,85,86,0.05));"></div>
+    </div>
+
+    <!-- KPIs Budget -->
+    <div class="section-head" style="margin-bottom:16px;">
+      Resumen Ejecutivo — Budget 2026
+      <span class="section-note">MXN Millones · Real Ene-Abr 2026 vs Budget Anual</span>
+    </div>
+
+    <!-- Global period selector Budget -->
+    <div id="budget-period-bar">
+      <button class="gp-btn active" onclick="setBudgetPeriod('fy26')">FY 2026</button>
+      <button class="gp-btn" onclick="setBudgetPeriod('q1')">Q1</button>
+      <button class="gp-btn" onclick="setBudgetPeriod('q2')">Q2</button>
+      <button class="gp-btn" onclick="setBudgetPeriod('q3')">Q3</button>
+      <button class="gp-btn" onclick="setBudgetPeriod('q4')">Q4</button>
+      <div class="gp-sep"></div>
+      <div style="position:relative;">
+        <button class="gp-btn" id="budget-mes-btn" onclick="toggleBudgetMonthPopup();event.stopPropagation()">Mes ▾</button>
+        <div id="budget-month-popup" style="display:none;position:absolute;top:calc(100% + 6px);left:0;z-index:200;background:#fff;border:1px solid rgba(31,85,86,0.2);border-radius:8px;padding:10px;min-width:220px;box-shadow:0 4px 24px rgba(0,0,0,0.12);">
+          <div id="budget-month-btns" style="display:flex;flex-wrap:wrap;gap:4px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="kpi-grid fade-in" id="budget-kpi-grid" style="margin-bottom:28px;grid-template-columns:repeat(5,minmax(0,1fr));"></div>
+
+    <div class="divider"></div>
+
+    <!-- Budget Charts -->
+    <div class="section-head" style="margin-bottom:16px;">
+      Gráficas Budget 2026 — Real (Ene-Abr 2026) vs Budget
+      <span class="section-note">MXN Millones · Línea sólida = Real · Línea punteada = Budget</span>
+    </div>
+
+    <!-- Row 1: Revenue + GP -->
+    <div class="charts-big-grid">
+      <div class="chart-card">
+        <div class="chart-card-head" style="background:var(--teal);">
+          <div class="chart-card-title">Revenue — Real vs Budget</div>
+          <div class="chart-card-kpi" id="bg-rev-kpi"></div>
+        </div>
+        <div class="chart-card-body">
+          <div class="chart-card-canvas"><canvas id="bg-rev"></canvas></div>
+          <div class="chart-card-legend" id="bg-rev-legend"></div>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-head" style="background:var(--forest);">
+          <div class="chart-card-title">Gross Profit — Real vs Budget</div>
+          <div class="chart-card-kpi" id="bg-gp-kpi"></div>
+        </div>
+        <div class="chart-card-body">
+          <div class="chart-card-canvas"><canvas id="bg-gp"></canvas></div>
+          <div class="chart-card-legend" id="bg-gp-legend"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 2: EBITDA + NI -->
+    <div class="charts-big-grid">
+      <div class="chart-card">
+        <div class="chart-card-head" style="background:var(--teal);">
+          <div class="chart-card-title">EBITDA — Real vs Budget</div>
+          <div class="chart-card-kpi" id="bg-ebitda-kpi"></div>
+        </div>
+        <div class="chart-card-body">
+          <div class="chart-card-canvas"><canvas id="bg-ebitda"></canvas></div>
+          <div class="chart-card-legend" id="bg-ebitda-legend"></div>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-head" style="background:var(--teal);">
+          <div class="chart-card-title">Net Income — Real vs Budget</div>
+          <div class="chart-card-kpi" id="bg-ni-kpi"></div>
+        </div>
+        <div class="chart-card-body">
+          <div class="chart-card-canvas"><canvas id="bg-ni"></canvas></div>
+          <div class="chart-card-legend" id="bg-ni-legend"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Budget Table -->
+    <div class="section-head" style="margin-bottom:16px;margin-top:8px;">
+      Tabla Budget 2026 — Ene a Dic 2026
+      <span class="section-note">MXN Millones · Sombreado = Actual · Blanco = Budget</span>
+    </div>
+    <div class="tbl-outer"><table id="budget-tbl"></table></div>
+
+  </div>
+
+  </div>
+    <div class="footer-left">VEMO · VCN Financial Dashboard · Información confidencial para uso interno e inversionistas</div>
+    <div class="footer-right">
+      <span class="footer-note">Cifras en MXN Millones · Al 30 de Abril 2026</span>
+      <span class="footer-conf">Strictly Private &amp; Confidential</span>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+// ── PALETTE & COLORS ──
+const TEAL='#11ABAB', FOREST='#1F5556', GRAY='#A6A6A6', RED='#c0392b', GREEN='#1a7a4a';
+const PAL=['#11ABAB','#1F5556','#5cc8c8','#2d8080','#7bb8b8','#88cccc','#4a9a9a','#3d7070','#60a0a0','#a0c0c0'];
+const gridC='rgba(31,85,86,0.07)', tc='#8a9a9a';
+
+Chart.defaults.color=tc;
+Chart.defaults.borderColor=gridC;
+Chart.defaults.font.family="'Space Grotesk',sans-serif";
+Chart.defaults.font.size=11;
+
+const MO=['Ene-25','Feb-25','Mar-25','Abr-25','May-25','Jun-25','Jul-25','Ago-25','Sep-25','Oct-25','Nov-25','Dic-25','Ene-26','Feb-26','Mar-26','Abr-26'];
+
+const D = {
+  Revenue:{vals:[7.285,7.164,7.677,9.633,11.35,11.27,11.619,12.526,16.923,13.908,13.018,13.861,14.673,14.4,16.946,16.652],children:{'LTO Users':[2.081,1.423,2.143,2.62,2.988,3.202,3.62,4.037,3.075,3.855,4.035,4.207,5.415,5.044,4.98,5.228],'LTO Adicional':[0.0,0.0,0.0,0.736,1.163,1.267,1.273,1.014,1.836,1.517,1.221,1.56,0.692,0.966,2.116,2.005],'B2C Users':[1.664,2.111,1.92,2.446,2.449,2.557,2.669,3.094,3.471,3.634,3.401,3.869,4.14,4.178,5.263,5.615],'DiDi PPC':[0.0,0.0,0.0,0.0,0.248,0.254,0.322,0.278,-0.316,0.157,0.177,0.369,0.271,0.165,0.278,0.388],'DiDi Drivers':[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.76,0.26,0.233,0.223,0.207,0.256,0.377,0.317],'DAE Hubs':[1.001,1.001,1.001,1.001,1.001,1.084,1.084,1.084,1.084,1.084,1.084,1.084,1.048,1.048,1.048,1.048],'DAE: Energy Cost Reimbursment':[2.479,2.539,2.538,2.754,2.619,2.658,2.575,2.846,2.741,2.439,2.694,2.373,2.345,2.185,2.226,1.593],'Others Revenue':[0.059,0.091,0.075,0.075,0.883,0.247,0.075,0.173,4.272,0.962,0.173,0.175,0.555,0.556,0.658,0.457]}},
+  COGS:{vals:[-4.534,-4.949,-4.875,-5.346,-6.273,-6.266,-6.572,-7.917,-7.898,-6.754,-7.782,-7.348,-7.091,-8.315,-11.59,-8.853],children:{'Energy Costs':[-1.719,-1.75,-1.872,-1.968,-2.564,-2.669,-2.85,-2.949,-4.152,-3.332,-3.859,-3.313,-3.753,-4.758,-7.059,-4.783],'Energy DAE':[-1.962,-2.066,-1.897,-2.579,-2.565,-2.573,-2.55,-4.354,-2.603,-2.31,-2.565,-2.241,-2.214,-2.077,-2.113,-1.945],'Revenue Share':[-0.085,-0.319,-0.301,-0.184,-0.233,-0.315,-0.338,-0.366,-0.35,-0.409,-0.407,-0.427,-0.412,-0.458,-0.843,-0.966],'Bank & Fees':[0.0,-0.189,-0.149,-0.162,-0.169,-0.123,-0.099,-0.109,-0.114,-0.117,-0.107,-0.129,-0.114,-0.128,-0.165,-0.161],'Chargebacks':[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,-0.025,-0.279,-0.017,-0.044,-0.032,-0.087],'Charger Insurance':[0.0,-0.005,0.0,-0.012,-0.012,-0.012,-0.023,-0.024,-0.049,-0.05,-0.347,-0.353,-0.051,-0.05,-0.267,-0.264],'O&M':[-0.527,-0.369,-0.535,-0.191,-0.358,-0.405,-0.292,0.054,-0.47,-0.318,-0.343,-0.387,-0.387,-0.633,-0.655,-0.534],'Maintenance Hubs':[-0.24,-0.25,-0.121,-0.249,-0.371,-0.169,-0.421,-0.171,-0.159,-0.217,-0.129,-0.218,-0.144,-0.168,-0.456,-0.113]}},
+  GP:{vals:[1.847,1.184,1.767,2.389,3.37,3.243,3.111,2.611,7.04,5.082,2.932,-2.665,4.164,2.828,0.978,3.733],children:{}},
+  GPm:{vals:[25.4,16.5,23.0,24.8,29.7,28.8,26.8,20.8,41.6,36.5,22.5,-19.2,28.4,19.6,5.8,22.4],children:{}},
+  Opex:{vals:[-0.903,-1.031,-1.035,-1.897,-1.708,-1.76,-1.935,-1.998,-1.984,-2.072,-2.305,-9.177,-3.417,-3.256,-4.378,-4.065],children:{'Cleaning':[0.0,0.0,-0.028,-0.065,-0.065,-0.065,-0.122,-0.178,-0.21,-0.192,-0.192,-0.309,-0.198,-0.212,-0.22,-0.255],'Security':[-0.201,-0.2,-0.242,-0.227,-0.151,-0.242,-0.227,-0.213,-0.168,-0.252,-0.277,-0.251,-0.279,-0.295,-0.557,-0.355],'HUB Utilities':[-0.004,-0.002,-0.008,-0.001,-0.033,-0.003,-0.01,-0.004,-0.01,-0.01,-0.006,-0.012,-0.021,-0.011,-0.02,-0.079],'Non-Executed Projects':[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,-0.06,-0.269,0.0,-0.154,-0.089],'Rent Hubs':[-0.698,-0.829,-0.756,-1.604,-1.458,-1.451,-1.576,-1.604,-1.597,-1.619,-1.83,-6.788,-1.414,-1.494,-1.884,-1.88],'D&A Hubs':[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,-1.142,-1.142,-1.414,-1.407]}},
+  SGA:{vals:[-1.347,-1.501,-1.821,-1.779,-1.893,-1.711,-1.913,-2.263,-2.35,-4.299,-2.902,5.385,-3.311,-4.098,-5.2,-5.59],children:{'Payroll Admin':[-1.114,-1.194,-1.32,-1.333,-1.681,-1.293,-1.265,-1.169,-1.273,-1.396,-1.519,-2.439,-2.073,-2.549,-2.19,-2.53],'  Wages':[0.0,0.0,0.0,0.0,0.0,0.0,0.0,-0.208,-0.222,-0.219,-0.251,-0.285,-0.307,-0.35,-0.358,-0.419],'  Bonus':[-0.073,-0.073,-0.073,-0.073,-0.073,-0.073,-0.073,-0.073,-0.073,-0.073,-0.073,-0.073,-0.203,-0.203,-0.203,-0.203],'  Benefits':[0.0,0.0,0.0,0.0,0.0,0.0,0.0,-0.104,-0.109,-0.106,-0.111,-0.173,-0.138,-0.144,-0.059,-0.171],'  Severance':[-0.003,-0.008,-0.005,-0.005,-0.237,-0.011,-0.011,-0.011,-0.011,0.04,-0.011,-0.584,-0.017,-0.017,-0.017,-0.017],'Payroll Staff Hubs':[0.0,0.0,0.0,0.0,0.0,0.0,0.0,-0.312,-0.331,-0.325,-0.362,-0.459,-0.445,-0.493,-0.417,-0.59],'MKT':[-0.117,-0.071,-0.03,-0.097,-0.02,-0.132,-0.026,-0.191,-0.041,-0.11,0.0,-0.262,-0.09,-0.052,-0.14,-0.834],'Advisory Fees':[-0.036,-0.016,-0.323,-0.185,-0.019,-0.151,-0.262,-0.146,-0.233,-0.378,-0.579,-0.344,-0.061,-0.328,-0.418,-0.494],'Office Supplies':[0.0,0.0,-0.011,0.0,-0.008,-0.026,-0.006,-0.037,-0.025,-0.036,-0.027,-0.029,-0.055,-0.048,-0.097,-0.047],'Insurance':[-0.024,-0.024,-0.025,-0.025,-0.024,-0.025,-0.024,-0.024,-0.045,-0.019,-0.002,-0.021,-0.123,-0.08,-0.027,-0.251],'Subscriptions':[-0.045,-0.133,-0.036,-0.026,-0.023,-0.03,-0.046,-0.038,-0.057,-0.036,-0.036,-0.047,-0.047,-0.117,-0.123,-0.018],'Financings':[0.0,0.0,0.0,0.0,0.0,0.0,-0.202,-0.202,-0.202,-1.432,-0.202,-1.797,-0.227,-0.202,-1.405,-0.202],'T&E':[0.0,-0.015,-0.008,-0.088,-0.051,-0.007,-0.03,-0.064,-0.031,-0.031,-0.066,-0.081,-0.118,-0.076,-0.107,-0.301],'Others':[-0.0,-0.0,-0.005,-0.001,-0.015,-0.009,0.0,-0.035,-0.007,-0.507,-0.0,10.944,-0.001,-0.001,-0.001,-0.277],'Internet Expense':[-0.01,-0.047,-0.062,-0.024,-0.05,-0.039,-0.052,-0.045,-0.038,-0.029,-0.067,-0.074,-0.02,-0.083,-0.085,-0.042]}},
+  CrossSGA:{vals:[-2.295,-3.349,-2.751,-2.615,-2.782,-3.467,-2.704,-2.259,-2.141,-2.675,-2.043,-1.547,-5.127,-5.958,-5.872],children:{}},
+  CorpGA:{vals:[-2.218,-2.534,-2.389,-2.558,-2.679,-2.602,-4.048,-3.788,-4.178,-3.507,-4.087,-6.059,-2.566,-2.908,-2.908],children:{}},
+  EBITDA:{vals:[-4.321,-6.507,-6.127,-5.082,-4.504,-5.056,-6.256,-6.402,-2.332,-6.103,-6.803,-5.589,-7.427,-10.743,-13.595,-10.955],children:{}},
+  DA:{vals:[-1.715,-1.84,-1.831,-2.474,-2.425,-2.384,-2.89,-2.546,-2.737,-2.636,-3.049,-9.971,-2.596,-2.508,-2.787,-2.769],children:{}},
+  Interest:{vals:[0.002,0.002,0.024,0.034,-1.466,-1.263,-2.31,-2.767,-2.041,-2.798,-2.727,7.726,-2.7,-2.575,1.364,-1.356],children:{}},
+  NI:{vals:[-6.23,-8.884,-8.364,-7.701,-5.715,-8.026,-9.809,-7.786,-4.793,-10.564,-11.604,-6.506,-13.531,-16.596,-16.079,-15.182],children:{}},
+};
+
+const crossSGA=[-2.295,-3.349,-2.751,-2.615,-2.782,-3.467,-2.704,-2.259,-2.141,-2.675,-2.043,-1.547,-5.127,-5.958,-5.872,-5.529];
+const corpGA=[-2.218,-2.534,-2.389,-2.558,-2.679,-2.602,-4.048,-3.788,-4.178,-3.507,-4.087,-6.059,-2.566,-2.908,-2.857,-2.925];
+const corpBonus=[-0.307,-0.307,-0.934,-0.519,-0.519,-0.519,-0.703,-0.703,-0.703,-0.703,-0.703,-0.703,-0.588,-0.606,-0.645,-0.645];
+const nonOp=[-0.197,-0.539,-0.429,-0.179,2.68,0.678,1.648,3.929,2.317,0.973,0.975,1.329,-0.807,-0.77,-1.061,-0.103];
+
+const round3=v=>Math.round(v*1000)/1000;
+D.EBITDAadj={vals:D.EBITDA.vals.map((v,i)=>v-crossSGA[i]-corpGA[i]-corpBonus[i]),children:{}};
+D.NIadj={vals:D.NI.vals.map((v,i)=>Math.round((v-nonOp[i])*1000)/1000),children:{}};
+D.CorpBonus={vals:corpBonus,children:{}};
+D.CrossSGA={vals:crossSGA,children:{}};
+D.CorpGA={vals:corpGA,children:{}};
+D.CrossCorp={vals:D.SGA.vals.map((v,i)=>Math.round((v+crossSGA[i]+corpGA[i]+corpBonus[i])*1000)/1000),children:{
+  'Direct SG&A':D.SGA.vals,
+  'Cross Functional SG&A':crossSGA,
+  'Corporate G&A':corpGA,
+  'Corporate Bonus':corpBonus,
+}};
+
+
+const s12=a=>a.slice(0,12).reduce((x,y)=>x+y,0);
+const s3=a=>a.slice(12).reduce((x,y)=>x+y,0);
+const pct=(a,b)=>b&&b!==0?((a-b)/Math.abs(b)*100):null;
+const fmtM=v=>{const a=Math.abs(v);const s=a>=1000?(a/1000).toFixed(1)+'B':a.toFixed(1)+'M';return v<0?`(${s})`:s;};
+const fmtV=v=>{if(Math.abs(v)<0.001)return '—';const a=Math.abs(v).toFixed(2);return v<0?`(${a})`:a;};
+const fmtPct=v=>{if(v===null)return '—';return(v>0?'+':'')+v.toFixed(1)+'%';};
+const vcls=v=>Math.abs(v)<0.001?'tzero':v<0?'tneg':'tpos';
+const pcls=(v,invert=false)=>{if(v===null)return 'neu';const good=invert?(v<0):(v>0);return good?'pos':'neg';};
+
+const ttip={backgroundColor:'#fff',borderColor:'rgba(31,85,86,0.2)',borderWidth:1,titleColor:'#4a6060',bodyColor:'#1a2424',padding:10,boxShadow:'0 2px 8px rgba(0,0,0,0.1)'};
+
+function makeGrad(ctx,color,h,a1=0.18,a2=0){
+  const g=ctx.chart.ctx.createLinearGradient(0,0,0,h);
+  const r=parseInt(color.slice(1,3),16),gv=parseInt(color.slice(3,5),16),b=parseInt(color.slice(5,7),16);
+  g.addColorStop(0,`rgba(${r},${gv},${b},${a1})`);
+  g.addColorStop(1,`rgba(${r},${gv},${b},${a2})`);
+  return g;
+}
+
+// ══ KPI CARDS ══
+const KPI_DEFS=[
+  {key:'Revenue',  label:'Revenue',               invert:false,pos:true, showMargin:false},
+  {key:'GP',       label:'Gross Profit',           invert:false,pos:true, showMargin:true},
+  {key:'EBITDA',   label:'EBITDA',                 invert:true, pos:false,showMargin:true},
+  {key:'EBITDAadj',label:'EBITDA ex. Corp & Cross',invert:true, pos:false,showMargin:true, adj:true},
+  {key:'NI',       label:'Net Income',             invert:true, pos:false,showMargin:false},
+  {key:'NIadj',    label:'Net Income ex. Non-Op',  invert:true, pos:false,showMargin:false,adj:true},
+];
+
+// ── GLOBAL PERIOD STATE ──
+let globalPeriod = 'fy25';
+
+function setGlobalPeriod(period) {
+  globalPeriod = period;
+  // Update button styles
+  document.querySelectorAll('.gp-btn').forEach(b => b.classList.remove('active','active-month'));
+  if(period==='fy25') {
+    document.querySelector('#global-period-bar .gp-btn:nth-child(1)')?.classList.add('active');
+  } else if(period==='ytd26') {
+    document.querySelector('#global-period-bar .gp-btn:nth-child(2)')?.classList.add('active');
+  } else {
+    document.getElementById(`gp-mo-${period}`)?.classList.add('active-month');
+  }
+  KPI_DEFS.forEach(d=>renderKpiCard(d.key));
+}
+
+function toggleGpMonthPopup(){
+  const popup=document.getElementById('gp-month-popup');
+  popup.style.display=popup.style.display==='none'?'flex':'none';
+}
+document.addEventListener('click',e=>{
+  if(!e.target.closest('#global-period-bar'))
+    document.getElementById('gp-month-popup').style.display='none';
+});
+
+function setGlobalPeriod(period) {
+  globalPeriod = period;
+  // Close month popup
+  document.getElementById('gp-month-popup').style.display='none';
+  // Update button styles
+  document.querySelectorAll('.gp-btn').forEach(b => b.classList.remove('active','active-month'));
+  if(period==='fy25') {
+    document.querySelector('#global-period-bar .gp-btn:nth-child(1)')?.classList.add('active');
+    document.getElementById('gp-mes-btn').textContent='Mes ▾';
+  } else if(period==='ytd26') {
+    document.querySelector('#global-period-bar .gp-btn:nth-child(2)')?.classList.add('active');
+    document.getElementById('gp-mes-btn').textContent='Mes ▾';
+  } else {
+    document.getElementById('gp-mes-btn').classList.add('active-month');
+    document.getElementById('gp-mes-btn').textContent=`${MO[+period]} ▾`;
+    document.getElementById(`gp-mo-${period}`)?.classList.add('active-month');
+  }
+  KPI_DEFS.forEach(d=>renderKpiCard(d.key));
+}
+
+function initGlobalPeriodBar(){
+  const wrap=document.getElementById('gp-month-btns');
+  wrap.style.cssText='display:flex;flex-wrap:wrap;gap:4px;';
+  wrap.innerHTML = MO.map((m,i)=>
+    `<button class="mo-btn" id="gp-mo-${i}" onclick="setGlobalPeriod(${i})">${m}</button>`
+  ).join('');
+}
+
+function getKpiVal(key,period){const v=D[key].vals;if(period==='fy25')return s12(v);if(period==='ytd26')return s3(v);return v[+period];}
+function getKpiLabel(p){if(p==='fy25')return 'FY 2025';if(p==='ytd26')return 'YTD 2026';return MO[+p];}
+function getMargin(key,period){const rev=getKpiVal('Revenue',period);const val=getKpiVal(key,period);if(!rev||rev===0)return null;return(val/rev*100);}
+function getMoM(key,period){if(period==='fy25'||period==='ytd26')return null;const i=+period;if(i===0)return null;return pct(D[key].vals[i],D[key].vals[i-1]);}
+function getYoY(key,period){if(period==='fy25')return pct(s12(D[key].vals),s12(D[key].vals)*0.72);if(period==='ytd26')return pct(s3(D[key].vals),D[key].vals.slice(0,4).reduce((a,b)=>a+b,0));const i=+period;return i>=12?pct(D[key].vals[i],D[key].vals[i-12]):null;}
+
+function renderKpiCard(key){
+  const def=KPI_DEFS.find(d=>d.key===key);
+  const period=globalPeriod;
+  const val=getKpiVal(key,period);
+  const mom=getMoM(key,period);
+  const yoy=getYoY(key,period);
+  const margin=def.showMargin?getMargin(key,period):null;
+  const vc=def.pos&&val>0?'pos':!def.pos&&val<0?'neg':'';
+  const card=document.getElementById(`kpi-card-${key}`);
+  if(!card)return;
+  card.innerHTML=`
+    <div class="kpi-name">${def.label}${def.adj?` <span style="font-size:9px;color:${TEAL};background:rgba(17,171,171,0.1);border:1px solid rgba(17,171,171,0.25);border-radius:3px;padding:1px 5px;margin-left:4px;">adj</span>`:''}</div>
+    ${def.adj?`<div class="kpi-adj-note">${key==='EBITDAadj'?'excl. Corp G&A & Cross SG&A':'excl. Non-Operating Rev/(Exp)'}</div>`:''}
+    <div class="kpi-value ${vc}">${fmtM(val)}</div>
+    <div class="kpi-period">${getKpiLabel(period)}</div>
+    <div class="kpi-deltas">
+      ${margin!==null?`<span class="kdelta"><span class="kdelta-lbl">Margen</span>&nbsp;<span class="kdelta-val ${margin<0?'dn':margin>5?'up':'neu'}">${margin.toFixed(1)}%</span></span>`:''}
+      ${mom!==null?`<span class="kdelta"><span class="kdelta-lbl">MoM</span>&nbsp;<span class="kdelta-val ${pcls(mom,def.invert)}">${fmtPct(mom)}</span></span>`:''}
+      ${yoy!==null?`<span class="kdelta"><span class="kdelta-lbl">YoY</span>&nbsp;<span class="kdelta-val ${pcls(yoy,def.invert)}">${fmtPct(yoy)}</span></span>`:''}
+    </div>`;
+}
+
+function buildKPIs(){
+  const g=document.getElementById('kpi-grid');
+  g.innerHTML=KPI_DEFS.map(d=>`<div class="kpi-card fade-in" id="kpi-card-${d.key}"></div>`).join('');
+  KPI_DEFS.forEach(d=>renderKpiCard(d.key));
+}
+
+// ══ SELECTORS MOM/YOY ══
+function initSelectors(){
+  ['mom-cur','mom-prev','yoy-cur','yoy-prev'].forEach(id=>{document.getElementById(id).innerHTML='';});
+  MO.forEach((m,i)=>{
+    document.getElementById('mom-cur').innerHTML+=`<option value="${i}" ${i===15?'selected':''}>${m}</option>`;
+    document.getElementById('mom-prev').innerHTML+=`<option value="${i}" ${i===14?'selected':''}>${m}</option>`;
+    document.getElementById('yoy-cur').innerHTML+=`<option value="${i}" ${i===15?'selected':''}>${m}</option>`;
+    document.getElementById('yoy-prev').innerHTML+=`<option value="${i}" ${i===2?'selected':''}>${m}</option>`;
+  });
+}
+
+function buildComparisons(){
+  const mets=[{name:'Revenue',key:'Revenue',inv:false},{name:'COGS',key:'COGS',inv:true},{name:'Gross Profit',key:'GP',inv:false},{name:'Opex',key:'Opex',inv:true},{name:'Direct SG&A',key:'SGA',inv:true},{name:'EBITDA',key:'EBITDA',inv:true},{name:'Net Income',key:'NI',inv:true}];
+  const ci=+document.getElementById('mom-cur').value, pi=+document.getElementById('mom-prev').value;
+  const cy=+document.getElementById('yoy-cur').value, py=+document.getElementById('yoy-prev').value;
+  const mkRows=(mets,ci,pi)=>mets.map(m=>{
+    const cur=D[m.key].vals[ci],prev=D[m.key].vals[pi],p=pct(cur,prev),delta=cur-prev;
+    return `<div class="comp-row"><span class="comp-name">${m.name}</span><span class="comp-vals"><span class="comp-base">${fmtM(cur)}</span><span class="comp-delta">${delta>=0?'+':''}${fmtM(delta)}</span><span class="comp-pct ${pcls(p,m.inv)}">${fmtPct(p)}</span></span></div>`;
+  }).join('');
+  document.getElementById('mom-table').innerHTML=mkRows(mets,ci,pi);
+  document.getElementById('yoy-table').innerHTML=mkRows(mets,cy,py);
+}
+
+// ══ MAIN CHARTS (Gráficas tab) ══
+const bigCharts={};
+
+function buildBigChart(id,type,datasets,opts={}){
+  if(bigCharts[id]){bigCharts[id].destroy();}
+  const baseOpts={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...ttip,mode:'index',intersect:false}},scales:{x:{grid:{display:false},border:{display:false},ticks:{color:tc,autoSkip:false,maxRotation:45,font:{size:10}}},y:{grid:{color:gridC},border:{display:false},ticks:{color:tc,callback:v=>v+'M'}}},...opts};
+  bigCharts[id]=new Chart(document.getElementById(id),{type,data:{labels:MO,datasets},options:baseOpts});
+  return bigCharts[id];
+}
+
+function buildLegend(containerId,chartId,items){
+  const el=document.getElementById(containerId);
+  if(!el)return;
+  el.innerHTML=items.map((item,i)=>`
+    <div class="chart-legend-item" id="leg-${containerId}-${i}" onclick="toggleBigSeries('${chartId}','${containerId}',${i})">
+      <span class="legend-line" style="background:${item.color};"></span>${item.label}
+    </div>`).join('');
+}
+
+function toggleBigSeries(chartId,legendId,idx){
+  const chart=bigCharts[chartId];
+  if(!chart)return;
+  const ds=chart.data.datasets[idx];
+  ds.hidden=!ds.hidden;
+  chart.update();
+  const btn=document.getElementById(`leg-${legendId}-${idx}`);
+  if(btn)btn.classList.toggle('hidden',ds.hidden);
+}
+
+function initBigCharts(){
+  const lineDs=(data,color,label,fill=true)=>({
+    label,data,borderColor:color,borderWidth:2.5,
+    backgroundColor:fill?(ctx=>makeGrad(ctx,color,160,0.14)):undefined,
+    fill,tension:0.4,pointRadius:3,
+    pointBackgroundColor:color,pointBorderColor:'#fff',pointBorderWidth:1.5,
+    pointHoverRadius:5,pointHoverBorderWidth:2
+  });
+  const negDs=(data,color,label)=>lineDs(data.map(v=>Math.abs(v)),color,label);
+
+  // 1 — Revenue
+  document.getElementById('g-rev-kpi').textContent=`FY25: ${fmtM(s12(D.Revenue.vals))}  ·  YTD26: ${fmtM(s3(D.Revenue.vals))}`;
+  buildBigChart('g-rev','line',[lineDs(D.Revenue.vals,TEAL,'Revenue')]);
+
+  // 2 — COGS
+  document.getElementById('g-cogs-kpi').textContent=`FY25: ${fmtM(s12(D.COGS.vals))}  ·  YTD26: ${fmtM(s3(D.COGS.vals))}`;
+  buildBigChart('g-cogs','line',[negDs(D.COGS.vals,FOREST,'COGS')]);
+
+  // 3 — Opex
+  document.getElementById('g-opex-kpi').textContent=`FY25: ${fmtM(s12(D.Opex.vals))}  ·  YTD26: ${fmtM(s3(D.Opex.vals))}`;
+  buildBigChart('g-opex','line',[negDs(D.Opex.vals,FOREST,'Opex')]);
+
+  // 4 — Gross Profit + Margen %
+  const gpMarginFY25=(s12(D.GP.vals)/s12(D.Revenue.vals)*100).toFixed(1);
+  document.getElementById('g-gp-kpi').textContent=`FY25: ${fmtM(s12(D.GP.vals))}  ·  Margen ${gpMarginFY25}%`;
+  buildBigChart('g-gp','bar',[
+    {label:'Gross Profit',data:D.GP.vals,backgroundColor:D.GP.vals.map(v=>v<0?'rgba(192,57,43,0.7)':'rgba(17,171,171,0.7)'),borderRadius:3,yAxisID:'y',order:2},
+    {label:'Margen %',data:D.GPm.vals,type:'line',borderColor:FOREST,borderWidth:2,borderDash:[5,3],pointRadius:2.5,pointBackgroundColor:FOREST,pointBorderColor:'#fff',pointBorderWidth:1,tension:0.4,fill:false,yAxisID:'y2',order:1}
+  ],{scales:{x:{grid:{display:false},border:{display:false},ticks:{color:tc,autoSkip:false,maxRotation:45,font:{size:10}}},y:{grid:{color:gridC},border:{display:false},ticks:{color:tc,callback:v=>v+'M'}},y2:{position:'right',grid:{display:false},border:{display:false},ticks:{color:FOREST,callback:v=>v+'%',font:{size:10}}}}});
+  buildLegend('g-gp-legend','g-gp',[{label:'Gross Profit',color:TEAL},{label:'Margen %',color:FOREST}]);
+
+  // 5 — SGA
+  document.getElementById('g-sga-kpi').textContent=`FY25: ${fmtM(s12(D.SGA.vals))}  ·  YTD26: ${fmtM(s3(D.SGA.vals))}`;
+  buildBigChart('g-sga','line',[negDs(D.SGA.vals,TEAL,'SG&A')]);
+
+  // 6 — Corp (Cross SGA + Corp G&A + Corp Bonus) con desglose
+  document.getElementById('g-corp-kpi').textContent=`FY25: ${fmtM(s12(D.CrossCorp.vals))}  ·  YTD26: ${fmtM(s3(D.CrossCorp.vals))}`;
+  buildBigChart('g-corp','line',[
+    {label:'Cross Functional SG&A',data:crossSGA.map(v=>Math.abs(v)),borderColor:TEAL,borderWidth:2,pointRadius:2.5,pointBackgroundColor:TEAL,pointBorderColor:'#fff',pointBorderWidth:1,tension:0.4,fill:false},
+    {label:'Corporate G&A',data:corpGA.map(v=>Math.abs(v)),borderColor:FOREST,borderWidth:2,pointRadius:2.5,pointBackgroundColor:FOREST,pointBorderColor:'#fff',pointBorderWidth:1,tension:0.4,fill:false},
+    {label:'Corporate Bonus',data:corpBonus.map(v=>Math.abs(v)),borderColor:GRAY,borderWidth:2,borderDash:[4,3],pointRadius:2.5,pointBackgroundColor:GRAY,pointBorderColor:'#fff',pointBorderWidth:1,tension:0.4,fill:false},
+  ]);
+  buildLegend('g-corp-legend','g-corp',[
+    {label:'Cross Functional SG&A',color:TEAL},
+    {label:'Corporate G&A',color:FOREST},
+    {label:'Corporate Bonus',color:GRAY},
+  ]);
+  document.getElementById('g-ebitda-kpi').textContent=`FY25: ${fmtM(s12(D.EBITDA.vals))}  ·  YTD26: ${fmtM(s3(D.EBITDA.vals))}`;
+  buildBigChart('g-ebitda','line',[lineDs(D.EBITDA.vals,TEAL,'EBITDA')]);
+
+  // 7 — EBITDA adj vs EBITDA
+  document.getElementById('g-ebitdaadj-kpi').textContent=`FY25: ${fmtM(s12(D.EBITDAadj.vals))}  ·  YTD26: ${fmtM(s3(D.EBITDAadj.vals))}`;
+  buildBigChart('g-ebitdaadj','line',[
+    {label:'EBITDA adj',data:D.EBITDAadj.vals,borderColor:TEAL,borderWidth:2.5,backgroundColor:ctx=>makeGrad(ctx,TEAL,160,0.12),fill:true,tension:0.4,pointRadius:3,pointBackgroundColor:TEAL,pointBorderColor:'#fff',pointBorderWidth:1.5},
+    {label:'EBITDA',data:D.EBITDA.vals,borderColor:GRAY,borderWidth:1.5,borderDash:[5,3],fill:false,tension:0.4,pointRadius:2,pointBackgroundColor:GRAY,pointBorderColor:'#fff',pointBorderWidth:1}
+  ]);
+  buildLegend('g-ebitdaadj-legend','g-ebitdaadj',[{label:'EBITDA ex. Cross & Corp',color:TEAL},{label:'EBITDA',color:GRAY}]);
+
+  // 8 — Net Income
+  document.getElementById('g-ni-kpi').textContent=`FY25: ${fmtM(s12(D.NI.vals))}  ·  YTD26: ${fmtM(s3(D.NI.vals))}`;
+  buildBigChart('g-ni','line',[
+    {label:'Net Income',data:D.NI.vals,borderColor:RED,borderWidth:2.5,backgroundColor:ctx=>makeGrad(ctx,RED,160,0.12),fill:true,tension:0.4,pointRadius:3,pointBackgroundColor:D.NI.vals.map(v=>v<0?RED:GREEN),pointBorderColor:'#fff',pointBorderWidth:1.5}
+  ]);
+
+  // 9 — Net Income adj vs NI
+  document.getElementById('g-niadj-kpi').textContent=`FY25: ${fmtM(s12(D.NIadj.vals))}  ·  YTD26: ${fmtM(s3(D.NIadj.vals))}`;
+  buildBigChart('g-niadj','line',[
+    {label:'NI ex. Non-Op',data:D.NIadj.vals,borderColor:FOREST,borderWidth:2.5,backgroundColor:ctx=>makeGrad(ctx,FOREST,160,0.1),fill:true,tension:0.4,pointRadius:3,pointBackgroundColor:FOREST,pointBorderColor:'#fff',pointBorderWidth:1.5},
+    {label:'Net Income',data:D.NI.vals,borderColor:RED,borderWidth:1.5,borderDash:[5,3],fill:false,tension:0.4,pointRadius:2,pointBackgroundColor:RED,pointBorderColor:'#fff',pointBorderWidth:1}
+  ]);
+  buildLegend('g-niadj-legend','g-niadj',[{label:'NI ex. Non-Operating',color:FOREST},{label:'Net Income',color:RED}]);
+}
+
+// ══ SPARKLINE P&L LINES ══
+const CHART_DEFS=[
+  {key:'Revenue',   label:'Revenue',              color:TEAL,   sign:1},
+  {key:'COGS',      label:'COGS',                 color:GRAY,   sign:-1},
+  {key:'Opex',      label:'Opex',                 color:FOREST, sign:-1},
+  {key:'GP',        label:'Gross Profit',          color:TEAL,   sign:1},
+  {key:'SGA',       label:'Direct SG&A',           color:FOREST, sign:-1},
+  {key:'CrossCorp', label:'Cross + Corp',          color:FOREST, sign:-1},
+  {key:'EBITDA',    label:'EBITDA',               color:FOREST, sign:-1},
+  {key:'NI',        label:'Net Income',           color:RED,    sign:-1},
+];
+
+const drillCharts={};
+let activeDrill=null;
+let sparkBuilt=false;
+
+function buildSparklines(){
+  if(sparkBuilt)return; sparkBuilt=true;
+  const wrap=document.getElementById('charts-wrap');
+  CHART_DEFS.forEach(def=>{
+    const d=D[def.key];
+    const fy25=s12(d.vals), ytd26=s3(d.vals);
+    const hasCh=Object.keys(d.children||{}).length>0;
+    const el=document.createElement('div');
+    el.className='spark-block'; el.id='sb-'+def.key;
+    el.innerHTML=`
+      <div class="spark-row">
+        <div class="spark-meta">
+          <div class="spark-name">${def.label}</div>
+          <div class="spark-kpi"><span class="${fy25<0?'neg':fy25>0?'pos':''}">${fmtM(fy25)}</span> <span style="font-size:11px;color:var(--text3);">FY25</span></div>
+        </div>
+        <div class="spark-right">
+          <div class="spark-ytd"><span style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;">YTD 26</span><span>${fmtM(ytd26)}</span></div>
+          ${hasCh?'<div class="spark-hint">desglose ↓</div>':''}
+        </div>
+      </div>
+      <div class="spark-canvas"><canvas id="sp-${def.key}" role="img" aria-label="${def.label} mensual">${def.label}.</canvas></div>`;
+    wrap.appendChild(el);
+
+    const dp=document.createElement('div');
+    dp.className='drill-panel'; dp.id='drill-'+def.key;
+    wrap.appendChild(dp);
+
+    if(hasCh) el.onclick=()=>drillDown(def.key);
+
+    const data=d.vals.map(v=>def.sign<0?Math.abs(v):v);
+    new Chart(document.getElementById('sp-'+def.key),{
+      type:'line',
+      data:{labels:MO,datasets:[{label:def.label,data,borderColor:def.color,borderWidth:2,backgroundColor:ctx=>makeGrad(ctx,def.color,80,0.1),fill:true,tension:0.4,pointRadius:0,pointHoverRadius:4,pointHoverBackgroundColor:def.color,pointHoverBorderColor:'#fff',pointHoverBorderWidth:2}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...ttip,callbacks:{label:ctx=>` ${ctx.raw.toFixed(2)}M`}}},scales:{x:{grid:{display:false},border:{display:false},ticks:{display:false}},y:{grid:{color:gridC},border:{display:false},ticks:{color:tc,font:{size:10},callback:v=>v+'M',maxTicksLimit:3}}}}
+    });
+  });
+}
+
+function toggleSeries(key,idx){
+  const chart=drillCharts[key];if(!chart)return;
+  const ds=chart.data.datasets[idx];
+  const btn=document.getElementById(`dl-btn-${key}-${idx}`);
+  ds.hidden=!ds.hidden;
+  if(btn)btn.classList.toggle('hidden',ds.hidden);
+  chart.update();
+}
+
+function drillDown(key){
+  const d=D[key];const ch=d.children||{};const ck=Object.keys(ch);
+  const panel=document.getElementById('drill-'+key);
+  const block=document.getElementById('sb-'+key);
+  if(activeDrill===key){panel.style.display='none';block.classList.remove('is-open');if(drillCharts[key]){drillCharts[key].destroy();delete drillCharts[key];}activeDrill=null;return;}
+  if(activeDrill){document.getElementById('drill-'+activeDrill).style.display='none';document.getElementById('sb-'+activeDrill).classList.remove('is-open');if(drillCharts[activeDrill]){drillCharts[activeDrill].destroy();delete drillCharts[activeDrill];}}
+  activeDrill=key;block.classList.add('is-open');
+  if(!ck.length){panel.innerHTML='<p style="font-size:12px;color:var(--text3);">Sin desglose disponible.</p>';panel.style.display='block';return;}
+  const lgd=ck.map((k,i)=>`<div class="dl-item" id="dl-btn-${key}-${i}" onclick="toggleSeries('${key}',${i})"><span class="dl-dot" style="background:${PAL[i%PAL.length]};"></span>${k}</div>`).join('');
+  const h=Math.max(200,ck.length*24+80);
+  panel.innerHTML=`
+    <div class="drill-head">
+      <div><div class="drill-title">${key} — Desglose mensual</div><div class="drill-meta">FY25 ${s12(d.vals).toFixed(1)}M · YTD26 ${s3(d.vals).toFixed(1)}M · <span>clic en leyenda para mostrar/ocultar</span></div></div>
+      <button class="drill-close" onclick="drillDown('${key}')">✕ cerrar</button>
+    </div>
+    <div class="drill-legend">${lgd}</div>
+    <div class="drill-canvas-wrap" style="height:${h}px;"><canvas id="dc-${key}" role="img" aria-label="Desglose ${key}">Desglose ${key}.</canvas></div>`;
+  panel.style.display='block';
+  drillCharts[key]=new Chart(document.getElementById('dc-'+key),{
+    type:'line',
+    data:{labels:MO,datasets:ck.map((k,i)=>({label:k,data:ch[k].map(v=>Math.abs(v)),borderColor:PAL[i%PAL.length],borderWidth:1.8,pointRadius:3,pointBackgroundColor:PAL[i%PAL.length],pointBorderColor:'#fff',pointBorderWidth:1,tension:0.4,fill:false,hidden:false}))},
+    options:{responsive:true,maintainAspectRatio:false,animation:{duration:250},plugins:{legend:{display:false},tooltip:{...ttip,callbacks:{label:ctx=>` ${ctx.dataset.label}: ${ctx.raw.toFixed(2)}M`}}},scales:{x:{grid:{display:false},border:{display:false},ticks:{color:tc,autoSkip:false,maxRotation:45,font:{size:10}}},y:{grid:{color:gridC},border:{display:false},ticks:{color:tc,callback:v=>v+'M'}}}}
+  });
+  panel.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+// ══ TABLE ══
+const tblOpen={};
+function buildTable(){
+
+  const SECS=[
+    {type:'hdr',label:'Revenues'},
+    {key:'Revenue',  plKey:'Revenue',  style:'rtotal',  label:'Revenue'},
+    {type:'hdr',label:'COGS + OPEX'},
+    {key:'COGS',     plKey:'COGS',     style:'rsubtot', label:'COGS'},
+    {key:'Opex',     plKey:'Opex',     style:'rsubtot', label:'Opex'},
+    {type:'hdr',label:'GP'},
+    {key:'GP',       plKey:'GP',       style:'rsubtot', label:'Gross Profit'},
+    {type:'hdr',label:'SG&A'},
+    {key:'SGA',      plKey:'SGA',      style:'',        label:'Direct SG&A'},
+    {key:'CrossSGA', plKey:'CrossSGA', style:'',        label:'Cross Functional SG&A'},
+    {key:'CorpGA',   plKey:'CorpGA',   style:'',        label:'Corporate G&A'},
+    {key:'CorpBonus',plKey:'CorpBonus',style:'',        label:'Corporate Bonus'},
+    {key:'CrossCorp',plKey:'CrossCorp',style:'rsubtot', label:'Total SG&A'},
+    {type:'hdr',label:'EBITDA + Net Income'},
+    {key:'EBITDA',   plKey:'EBITDA',   style:'rsubtot', label:'EBITDA'},
+    {key:'DA',       plKey:'DA',       style:'',        label:'D&A'},
+    {key:'Interest', plKey:'Interest', style:'',        label:'Interest Expense'},
+    {key:'NI',       plKey:'NI',       style:'rtotal',  label:'Net Income'},
+  ];
+  const tbl=document.getElementById('pl-tbl');
+  let h='<thead><tr><th>Concepto</th>';
+  MO.forEach((m,i)=>h+=`<th class="${i<12?'y25':'y26'}">${m}</th>`);
+  h+='</tr></thead><tbody>';
+  SECS.forEach(sec=>{
+    if(sec.type==='hdr'){h+=`<tr class="rsec"><td colspan="${MO.length+1}">${sec.label}</td></tr>`;return;}
+    const d=D[sec.plKey];const ch=d.children||{};const hc=Object.keys(ch).length>0;
+    const icon=hc?`<span class="xicon" id="ti-${sec.key}">${tblOpen[sec.key]?'−':'+'}</span>`:'<span style="display:inline-block;width:22px;"></span>';
+    h+=`<tr class="rparent ${sec.style}" ${hc?`onclick="tblTog('${sec.key}')"`:''}><td><span class="rl">${icon}${sec.label}</span></td>`;
+    d.vals.forEach(v=>h+=`<td class="${vcls(v)}">${fmtV(v)}</td>`);
+    h+='</tr>';
+    if(hc){Object.entries(ch).forEach(([cn,cv])=>{const show=tblOpen[sec.key]?'':'rchild-hide';h+=`<tr class="rchild ${show}" id="tc-${sec.key}-${cn.replace(/\W/g,'_')}"><td><span class="rl"><span style="display:inline-block;width:22px;"></span>${cn}</span></td>`;cv.forEach(v=>h+=`<td class="${vcls(v)}">${fmtV(v)}</td>`);h+='</tr>';});}
+  });
+  h+='</tbody>';tbl.innerHTML=h;
+}
+
+function tblTog(key){
+  tblOpen[key]=!tblOpen[key];
+  const ic=document.getElementById('ti-'+key);if(ic)ic.textContent=tblOpen[key]?'−':'+';
+  Object.keys(D[key].children||{}).forEach(cn=>{const el=document.getElementById('tc-'+key+'-'+cn.replace(/\W/g,'_'));if(el)el.classList.toggle('rchild-hide',!tblOpen[key]);});
+}
+
+let tableBuilt=false;
+function showView(name){
+  ['graficas','pl','tabla'].forEach(v=>{document.getElementById('view-'+v).style.display=v===name?'':'none';});
+  document.querySelectorAll('.tab-btn').forEach((t,i)=>t.classList.toggle('active',['graficas','pl','tabla'][i]===name));
+  if(name==='pl') buildSparklines();
+  if(name==='tabla'&&!tableBuilt){tableBuilt=true;buildTable();}
+}
+
+// ══ BUDGET DATA ══
+const MO_B=['Ene-26','Feb-26','Mar-26','Abr-26','May-26','Jun-26','Jul-26','Ago-26','Sep-26','Oct-26','Nov-26','Dic-26'];
+// Actuals = first 3 months (Ene-Mar 2026 from main data), Budget = all 12 months from Hoja1
+const B = {
+  Revenue: [14.466,13.742,16.374,17.331,19.512,20.65,23.209,25.288,26.68,29.887,32.165,35.968],
+  _RevenueCh: {'LTO Users':[5.871,5.622,7.172,7.795,9.008,9.7,11.093,12.213,12.938,14.612,15.57,17.633],'B2C Users':[4.663,4.4,5.162,5.537,6.335,6.823,7.83,8.701,9.406,10.771,11.614,13.154],'DiDi PPC':[0.264,0.253,0.318,0.341,0.392,0.42,0.477,0.522,0.55,0.616,0.647,0.725],'DiDi Drivers':[0.246,0.242,0.291,0.303,0.335,0.346,0.387,0.417,0.433,0.477,0.49,0.536],'DAE Fee':[1.084,1.084,1.084,1.084,1.084,1.084,1.084,1.084,1.084,1.084,1.084,1.084],'Others Revenue':[2.337,2.141,2.347,2.271,2.357,2.278,2.338,2.349,2.268,2.328,2.76,2.835]},
+  COGS:    [-8.17,-7.727,-9.186,-9.566,-10.569,-11.233,-12.704,-12.904,-13.55,-15.086,-16.433,-18.142],
+  _COGSCh: {'Energy Costs':[-4.627,-4.402,-5.466,-5.731,-6.444,-6.981,-8.05,-8.184,-8.744,-9.947,-11.058,-12.324],'Energy DAE':[-2.179,-1.983,-2.19,-2.113,-2.199,-2.12,-2.18,-2.191,-2.11,-2.17,-2.111,-2.17],'Revenue Share':[-0.473,-0.463,-0.513,-0.545,-0.615,-0.664,-0.748,-0.835,-0.919,-1.053,-1.131,-1.253],'Bank & Fees':[-0.342,-0.326,-0.403,-0.437,-0.505,-0.545,-0.626,-0.693,-0.74,-0.84,-0.913,-1.033],'Chargebacks':[-0.003,-0.003,-0.005,-0.031,-0.044,-0.053,-0.059,-0.111,-0.114,-0.12,-0.14,-0.182],'O&M':[-0.498,-0.5,-0.554,-0.646,-0.693,-0.733,-0.786,-0.81,-0.837,-0.864,-0.986,-1.084]},
+  GP:      [3.267,2.956,3.507,4.057,5.179,5.068,5.911,7.782,8.247,9.678,9.976,11.431],
+  Opex:    [-3.029,-3.059,-3.68,-3.708,-3.764,-4.349,-4.594,-4.602,-4.883,-5.123,-5.755,-6.394],
+  _OpexCh: {'Cleaning':[-0.147,-0.147,-0.168,-0.21,-0.231,-0.252,-0.294,-0.294,-0.294,-0.294,-0.378,-0.441],'Security':[-0.253,-0.253,-0.29,-0.181,-0.199,-0.217,-0.253,-0.253,-0.253,-0.253,-0.362,-0.416],'HUB Utilities':[-0.119,-0.119,-0.136,-0.17,-0.187,-0.204,-0.238,-0.238,-0.238,-0.238,-0.306,-0.357],'Total Rent':[-2.509,-2.539,-3.087,-3.147,-3.147,-3.676,-3.809,-3.816,-4.097,-4.337,-4.709,-5.18]},
+  SGA:     [-4.19,-4.282,-6.195,-5.791,-5.896,-9.172,-7.188,-7.458,-8.183,-8.324,-8.309,-8.954],
+  _SGACh:  {'Payroll Admin':[-1.956,-2.063,-3.04,-3.656,-3.745,-4.707,-4.707,-4.707,-4.707,-5.013,-5.013,-5.013],'Payroll Staff Hubs':[-0.941,-1.136,-1.136,-1.288,-1.288,-1.391,-1.588,-1.873,-1.873,-2.463,-2.463,-2.463],'MKT':[-0.465,-0.48,-0.495,-0.51,-0.525,-0.54,-0.555,-0.54,-0.525,-0.51,-0.495,-0.48],'Advisory Fees':[-0.722,-0.498,-0.232,-0.232,-0.232,-0.672,-0.232,-0.232,-0.232,-0.232,-0.232,-0.232],'Financings':[-0.106,-0.106,-1.292,-0.106,-0.106,-1.072,-0.106,-0.106,-0.846,-0.106,-0.106,-0.766]},
+  CrossSGA:[-5.98,-5.594,-6.032,-6.035,-6.274,-6.724,-6.539,-6.753,-6.88,-6.82,-6.983,-7.008],
+  CorpGA:  [-4.11,-4.408,-4.515,-4.68,-4.557,-4.758,-4.62,-4.63,-4.633,-4.636,-4.639,-4.642],
+  EBITDA:  [-11.012,-11.328,-13.234,-12.449,-11.548,-15.585,-12.436,-11.06,-11.45,-10.102,-9.954,-9.173],
+  NI:      [-15.432,-15.922,-18.164,-18.119,-18.201,-22.508,-20.214,-19.738,-20.613,-19.721,-20.13,-20.371],
+};
+// GPm budget
+B.GPm = B.GP.map((v,i)=>B.Revenue[i]?round1(v/B.Revenue[i]*100):0);
+B.EBITDAadj = [-0.922,-1.326,-2.687,-1.734,-0.717,-4.103,-1.277,0.323,0.063,1.354,1.668,2.477];
+
+// Actuals Ene-Abr 2026 (from VCN Board View, months 12-15)
+const ACT_26 = {
+  Revenue:   D.Revenue.vals.slice(12),
+  COGS:      D.COGS.vals.slice(12),
+  GP:        D.GP.vals.slice(12),
+  Opex:      D.Opex.vals.slice(12),
+  SGA:       D.SGA.vals.slice(12),
+  EBITDA:    D.EBITDA.vals.slice(12),
+  EBITDAadj: D.EBITDAadj.vals.slice(12),
+  NI:        D.NI.vals.slice(12),
+};
+function round1(v){return Math.round(v*10)/10;}
+
+// ── BUDGET PERIOD STATE ──
+let budgetPeriod='fy26';
+
+function setBudgetPeriod(period){
+  budgetPeriod=period;
+  document.getElementById('budget-month-popup').style.display='none';
+  document.querySelectorAll('#budget-period-bar .gp-btn').forEach(b=>b.classList.remove('active','active-month'));
+  const map={'fy26':0,'q1':1,'q2':2,'q3':3,'q4':4};
+  if(map[period]!==undefined){
+    document.querySelectorAll('#budget-period-bar .gp-btn')[map[period]]?.classList.add('active');
+    document.getElementById('budget-mes-btn').textContent='Mes ▾';
+  } else {
+    document.getElementById('budget-mes-btn').classList.add('active-month');
+    document.getElementById('budget-mes-btn').textContent=MO_B[+period]+' ▾';
+    document.getElementById(`bmo-${period}`)?.classList.add('active-month');
+  }
+  BUDGET_KPI_DEFS.forEach(d=>renderBudgetKpi(d.key));
+}
+
+function toggleBudgetMonthPopup(){
+  const p=document.getElementById('budget-month-popup');
+  p.style.display=p.style.display==='none'?'block':'none';
+}
+document.addEventListener('click',e=>{
+  if(!e.target.closest('#budget-period-bar'))
+    document.getElementById('budget-month-popup').style.display='none';
+});
+
+function getBudgetVal(key,period){
+  const bv=B[key];
+  if(period==='fy26') return bv.reduce((a,b)=>a+b,0);
+  if(period==='q1')   return bv.slice(0,3).reduce((a,b)=>a+b,0);
+  if(period==='q2')   return bv.slice(3,6).reduce((a,b)=>a+b,0);
+  if(period==='q3')   return bv.slice(6,9).reduce((a,b)=>a+b,0);
+  if(period==='q4')   return bv.slice(9,12).reduce((a,b)=>a+b,0);
+  return bv[+period];
+}
+function getBudgetLabel(p){
+  if(p==='fy26') return 'FY 2026 Budget';
+  if(p==='q1') return 'Q1 2026 Budget';
+  if(p==='q2') return 'Q2 2026 Budget';
+  if(p==='q3') return 'Q3 2026 Budget';
+  if(p==='q4') return 'Q4 2026 Budget';
+  return MO_B[+p]+' Budget';
+}
+function getBudgetMargin(key,period){
+  const rev=getBudgetVal('Revenue',period);
+  const val=getBudgetVal(key,period);
+  return rev?round1(val/rev*100):null;
+}
+function getActualVal(key,period){
+  // actual months: Ene-26=0, Feb-26=1, Mar-26=2, Abr-26=3 (4 months)
+  const av=ACT_26[key]||[];
+  const nActuals=av.length; // 4
+  if(period==='q1') return av.slice(0,3).reduce((a,b)=>a+b,0);
+  if(period==='q2'){
+    // Q2 = Apr-Jun; only Apr is actual
+    return av.length>=4?(av[3]||0):null;
+  }
+  if(typeof period==='number'||!isNaN(+period)){
+    const i=+period; return i<nActuals?(av[i]||0):null;
+  }
+  if(period==='fy26') return av.reduce((a,b)=>a+b,0); // YTD partial
+  return null;
+}
+function getVarVsBudget(key,period){
+  const bv=getBudgetVal(key,period);
+  const av=getActualVal(key,period);
+  if(av===null||bv===0) return null;
+  return pct(av,bv);
+}
+
+const BUDGET_KPI_DEFS=[
+  {key:'Revenue',   label:'Revenue',              invert:false, showMargin:false},
+  {key:'GP',        label:'Gross Profit',          invert:false, showMargin:true},
+  {key:'EBITDA',    label:'EBITDA',                invert:true,  showMargin:true},
+  {key:'EBITDAadj', label:'EBITDA ex. Corp & Cross',invert:true, showMargin:true, adj:true},
+  {key:'NI',        label:'Net Income',            invert:true,  showMargin:false},
+];
+
+function renderBudgetKpi(key){
+  const def=BUDGET_KPI_DEFS.find(d=>d.key===key);
+  const period=budgetPeriod;
+  const bval=getBudgetVal(key,period);
+  const aval=getActualVal(key,period);
+  const margin_b=def.showMargin?getBudgetMargin(key,period):null;
+  const varPct=getVarVsBudget(key,period);
+  const bvc=def.invert&&bval<0?'neg':!def.invert&&bval>0?'pos':'';
+  const avc=aval!==null?(def.invert&&aval<0?'neg':!def.invert&&aval>0?'pos':''):'';
+  const delta=aval!==null?aval-bval:null;
+  const card=document.getElementById(`bkpi-${key}`);
+  if(!card)return;
+
+  // variance pill
+  const vpClass=varPct===null?'neu':pcls(varPct,def.invert);
+  const vpHtml=varPct!==null?`<span class="kpi-var-pill ${vpClass}">${fmtPct(varPct)}</span>`:'<span class="kpi-var-pill neu">—</span>';
+  const deltaHtml=delta!==null?`<span class="kpi-avb-delta">${delta>=0?'+':''}${fmtM(delta)}</span>`:'';
+
+  // margin row
+  const marginHtml=margin_b!==null?`
+    <div style="margin-top:6px;display:flex;gap:6px;align-items:center;">
+      <span style="font-size:9px;color:var(--text3);">Margen Bdgt</span>
+      <span style="font-size:10px;font-weight:700;color:${margin_b<0?'var(--red)':margin_b>5?'var(--green)':'var(--text2)'};">${margin_b}%</span>
+    </div>`:'';
+
+  card.innerHTML=`
+    <div class="kpi-name">${def.label}${def.adj?` <span style="font-size:9px;color:${TEAL};background:rgba(17,171,171,0.1);border:1px solid rgba(17,171,171,0.25);border-radius:3px;padding:1px 5px;margin-left:4px;">adj</span>`:''}
+    </div>
+    ${def.adj?`<div class="kpi-adj-note">excl. Corp G&A & Cross SG&A</div>`:''}
+    <div class="kpi-avb">
+      <div class="kpi-avb-row">
+        <span class="kpi-avb-lbl actual">Real</span>
+        <span class="kpi-avb-val ${avc}" style="color:${aval!==null?TEAL:'var(--text3)'};">${aval!==null?fmtM(aval):'—'}</span>
+        <div class="kpi-avb-right">${vpHtml}${deltaHtml}</div>
+      </div>
+      <div class="kpi-avb-row">
+        <span class="kpi-avb-lbl budget">Budget</span>
+        <span class="kpi-avb-val ${bvc}">${fmtM(bval)}</span>
+        <div class="kpi-avb-right">
+          <span style="font-size:9px;color:var(--text3);">${getBudgetLabel(period)}</span>
+        </div>
+      </div>
+    </div>
+    ${marginHtml}`;
+}
+
+function buildBudgetKPIs(){
+  const g=document.getElementById('budget-kpi-grid');
+  g.innerHTML=BUDGET_KPI_DEFS.map(d=>`<div class="kpi-card fade-in" id="bkpi-${d.key}"></div>`).join('');
+  // month buttons
+  document.getElementById('budget-month-btns').innerHTML=
+    MO_B.map((m,i)=>`<button class="mo-btn" id="bmo-${i}" onclick="setBudgetPeriod(${i})">${m}</button>`).join('');
+  BUDGET_KPI_DEFS.forEach(d=>renderBudgetKpi(d.key));
+}
+
+// ── BUDGET CHARTS ──
+const budgetCharts={};
+let budgetBuilt=false;
+
+function buildBudgetCharts(){
+  if(budgetBuilt)return; budgetBuilt=true;
+
+  // Actual values for the 3 known months (padded with null for budget months)
+  const actPad=(key)=>[...(ACT_26[key]||[]),
+    ...Array(8).fill(null)];
+  const budgetLine=(data,color,dash=[])=>({
+    data,borderColor:color,borderWidth:2,
+    borderDash:dash,
+    pointRadius:data.map(v=>v===null?0:3),
+    pointBackgroundColor:color,pointBorderColor:'#fff',pointBorderWidth:1.5,
+    tension:0.4,fill:false,spanGaps:false
+  });
+
+  const opts={responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false},tooltip:{...ttip,mode:'index',intersect:false}},
+    scales:{x:{grid:{display:false},border:{display:false},ticks:{color:tc,autoSkip:false,maxRotation:45,font:{size:10}}},
+            y:{grid:{color:gridC},border:{display:false},ticks:{color:tc,callback:v=>v+'M'}}}};
+
+  const ACTUAL_COLOR='#1FF1B0';
+
+  const mk=(id,key,color,kpiId)=>{
+    const isNeg=key!=='Revenue'&&key!=='GP';
+    const bData=isNeg?B[key].map(v=>Math.abs(v)):B[key];
+    const aData=isNeg?actPad(key).map(v=>v!==null?Math.abs(v):null):actPad(key);
+    document.getElementById(kpiId).textContent=
+      `Budget FY26: ${fmtM(B[key].reduce((a,b)=>a+b,0))}`;
+    if(budgetCharts[id]) budgetCharts[id].destroy();
+    budgetCharts[id]=new Chart(document.getElementById(id),{
+      type:'line',
+      data:{labels:MO_B,datasets:[
+        {...budgetLine(bData,color,[5,3]),label:'Budget'},
+        {...budgetLine(aData,ACTUAL_COLOR),label:'Real',borderWidth:2.5,
+          backgroundColor:ctx=>makeGrad(ctx,ACTUAL_COLOR,160,0.12),fill:true},
+      ]},
+      options:opts
+    });
+    buildLegend(`${id}-legend`,id,[{label:'Budget',color:color},{label:'Real',color:ACTUAL_COLOR}]);
+  };
+
+  mk('bg-rev','Revenue',TEAL,'bg-rev-kpi');
+  mk('bg-gp','GP',TEAL,'bg-gp-kpi');
+  mk('bg-ebitda','EBITDA',FOREST,'bg-ebitda-kpi');
+  mk('bg-ni','NI',TEAL,'bg-ni-kpi');
+}
+
+// ── BUDGET TABLE ──
+let budgetTableBuilt=false;
+const btblOpen={};
+function buildBudgetTable(){
+  if(budgetTableBuilt)return; budgetTableBuilt=true;
+  const SECS=[
+    {type:'hdr',label:'Revenues'},
+    {key:'Revenue', label:'Revenue',      style:'rtotal',  ch:'_RevenueCh'},
+    {type:'hdr',label:'COGS + OPEX'},
+    {key:'COGS',    label:'COGS',         style:'rsubtot', ch:'_COGSCh'},
+    {key:'Opex',    label:'Opex',         style:'rsubtot', ch:'_OpexCh'},
+    {type:'hdr',label:'GP'},
+    {key:'GP',      label:'Gross Profit', style:'rsubtot', ch:null},
+    {type:'hdr',label:'SG&A'},
+    {key:'SGA',     label:'Direct SG&A',  style:'',        ch:'_SGACh'},
+    {key:'CrossSGA',label:'Cross Functional SG&A', style:'', ch:null},
+    {key:'CorpGA',  label:'Corporate G&A',style:'',        ch:null},
+    {type:'hdr',label:'EBITDA + Net Income'},
+    {key:'EBITDA',  label:'EBITDA',       style:'rsubtot', ch:null},
+    {key:'NI',      label:'Net Income',   style:'rtotal',  ch:null},
+  ];
+  const tbl=document.getElementById('budget-tbl');
+  let h='<thead><tr><th>Concepto</th>';
+  MO_B.forEach((m,i)=>h+=`<th class="${i<4?'y26':''}"><span style="${i>=4?'color:rgba(31,85,86,0.5);font-size:9px;':''}">${i<4?'★ ':''}</span>${m}</th>`);
+  h+='</tr></thead><tbody>';
+  SECS.forEach(sec=>{
+    if(sec.type==='hdr'){h+=`<tr class="rsec"><td colspan="${MO_B.length+1}">${sec.label}</td></tr>`;return;}
+    const hasCh = sec.ch && B[sec.ch] && Object.keys(B[sec.ch]).length>0;
+    const icon = hasCh ? `<span class="xicon" id="bti-${sec.key}">${btblOpen[sec.key]?'−':'+'}</span>` : '<span style="display:inline-block;width:22px;"></span>';
+    const clickAttr = hasCh ? `onclick="btblTog('${sec.key}')"` : '';
+    h+=`<tr class="rparent ${sec.style}" ${clickAttr}><td><span class="rl">${icon}${sec.label}</span></td>`;
+    B[sec.key].forEach((v,i)=>{
+      const isAct=i<4;
+      h+=`<td class="${vcls(v)}" style="${isAct?'background:rgba(17,171,171,0.08);':''}">${fmtV(v)}</td>`;
+    });
+    h+='</tr>';
+    if(hasCh){
+      Object.entries(B[sec.ch]).forEach(([cn,cv])=>{
+        const show=btblOpen[sec.key]?'':'rchild-hide';
+        h+=`<tr class="rchild ${show}" id="btc-${sec.key}-${cn.replace(/\W/g,'_')}"><td><span class="rl"><span style="display:inline-block;width:22px;"></span>${cn}</span></td>`;
+        cv.forEach((v,i)=>{
+          const isAct=i<3;
+          h+=`<td class="${vcls(v)}" style="${isAct?'background:rgba(17,171,171,0.05);':''}">${fmtV(v)}</td>`;
+        });
+        h+='</tr>';
+      });
+    }
+  });
+  h+='</tbody>';
+  tbl.innerHTML=h;
+}
+
+function btblTog(key){
+  btblOpen[key]=!btblOpen[key];
+  const ic=document.getElementById('bti-'+key);
+  if(ic) ic.textContent=btblOpen[key]?'−':'+';
+  const ch=B['_'+key+'Ch']||{};
+  Object.keys(ch).forEach(cn=>{
+    const el=document.getElementById('btc-'+key+'-'+cn.replace(/\W/g,'_'));
+    if(el) el.classList.toggle('rchild-hide',!btblOpen[key]);
+  });
+}
+
+// ══ OPERATIONAL METRICS (Hoja2) ══
+const MO_OPS=['Dic-25','Ene-26','Feb-26','Mar-26'];
+const OPS = {
+  capacity:     {active:[19.386,19.482,19.662,25.367], anchored:[11.48,11.48,11.48,16.64], pureDest:[4.846,4.942,4.942,5.247], rhf:[0,0,0.18,0.42], dae:[3.06,3.06,3.06,3.06]},
+  connectors:   {active:[718,723,729,836], anchored:[216,216,216,300], pureDest:[400,405,405,420]},
+  throughput:   {active:[2094.371,2127.144,2116.161,2493.385], anchored:[1132.71,1206.426,1201.125,1419.332], pureDest:[177.079,176.493,181.081,197.051], rhf:[0,0,1.477,26.119], dae:[784.581,744.225,732.478,850.882]},
+  utilization:  {active:[0.215,0.197,0.208,0.200], anchored:[0.265,0.228,0.251,0.205], pureDest:[0.052,0.049,0.055,0.050]},
+  revPerKwh:    [7.415,7.376,7.324,7.365],
+  gpPerKwh:     [-5.79,1.584,1.419,1.155],
+  gpMarginKwh:  [-0.781,0.259,0.194,0.157],
+  revPerConn:   [15766.858,16425.419,16162.326,16480.609],
+  uptime:       [0.987,0.992,0.981,0.991],
+};
+
+function buildOpsKPIs(){
+  const kpis=[
+    {label:'Conectores Activos', val: OPS.connectors.active[3], sub:`Mar-26`, note:`+${OPS.connectors.active[3]-OPS.connectors.active[0]} vs Dic-25`, color:TEAL},
+    {label:'Capacidad Instalada', val: OPS.capacity.active[3].toFixed(1)+' MW', sub:'Mar-26', note:`${OPS.capacity.active[3]>OPS.capacity.active[0]?'+':''}${(OPS.capacity.active[3]-OPS.capacity.active[0]).toFixed(1)} MW vs Dic-25`, color:FOREST},
+    {label:'Throughput Activo', val: (OPS.throughput.active[3]/1000).toFixed(2)+' MWh', sub:'Mar-26', note:`${((OPS.throughput.active[3]-OPS.throughput.active[0])/OPS.throughput.active[0]*100).toFixed(1)}% vs Dic-25`, color:TEAL},
+    {label:'Utilización Red', val: (OPS.utilization.active[3]*100).toFixed(1)+'%', sub:'Mar-26', note:`Anclados: ${(OPS.utilization.anchored[3]*100).toFixed(1)}%`, color:FOREST},
+    {label:'Revenue / Conector', val: '$'+OPS.revPerConn[3].toLocaleString('es-MX',{maximumFractionDigits:0}), sub:'Mar-26', note:`${OPS.revPerConn[3]>OPS.revPerConn[0]?'+':''}${((OPS.revPerConn[3]-OPS.revPerConn[0])/OPS.revPerConn[0]*100).toFixed(1)}% vs Dic-25`, color:TEAL},
+    {label:'Rev Promedio / kWh', val: '$'+OPS.revPerKwh[3].toFixed(2), sub:'Mar-26', note:`Dic-25: $${OPS.revPerKwh[0].toFixed(2)}`, color:FOREST},
+    {label:'GP / kWh', val: '$'+OPS.gpPerKwh[3].toFixed(2), sub:'Mar-26', note:`Dic-25: $${OPS.gpPerKwh[0].toFixed(2)}`, color:OPS.gpPerKwh[3]>=0?TEAL:RED},
+    {label:'Uptime Red', val: (OPS.uptime[3]*100).toFixed(1)+'%', sub:'Mar-26', note:`Dic-25: ${(OPS.uptime[0]*100).toFixed(1)}%`, color:TEAL},
+  ];
+  const g=document.getElementById('ops-kpi-grid');
+  g.innerHTML=kpis.map(k=>`
+    <div class="kpi-card">
+      <div class="kpi-name">${k.label}</div>
+      <div class="kpi-value" style="font-size:22px;color:${k.color};">${k.val}</div>
+      <div class="kpi-period">${k.sub}</div>
+      <div class="kpi-deltas"><span class="kdelta"><span class="kdelta-val neu">${k.note}</span></span></div>
+    </div>`).join('');
+}
+
+let opsCharts={};
+function buildOpsCharts(){
+  const opts={responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false},tooltip:{...ttip,mode:'index',intersect:false}},
+    scales:{x:{grid:{display:false},border:{display:false},ticks:{color:tc}},
+            y:{grid:{color:gridC},border:{display:false},ticks:{color:tc}}}};
+
+  // Connectors
+  const lastConn=OPS.connectors.active[3];
+  document.getElementById('ops-conn-kpi').textContent=`Mar-26: ${lastConn}`;
+  if(opsCharts['ops-conn'])opsCharts['ops-conn'].destroy();
+  opsCharts['ops-conn']=new Chart(document.getElementById('ops-conn'),{type:'bar',
+    data:{labels:MO_OPS,datasets:[
+      {label:'Anclados',data:OPS.connectors.anchored,backgroundColor:'rgba(31,85,86,0.75)',borderRadius:3,stack:'s'},
+      {label:'Pure Dest.',data:OPS.connectors.pureDest,backgroundColor:'rgba(17,171,171,0.75)',borderRadius:3,stack:'s'},
+    ]},options:{...opts,scales:{...opts.scales,x:{...opts.scales.x,stacked:true},y:{...opts.scales.y,stacked:true}}}});
+  buildLegend('ops-conn-legend','ops-conn',[{label:'Anclados',color:FOREST},{label:'Pure Dest.',color:TEAL}]);
+
+  // Throughput (in MWh = divide by 1000)
+  const lastThru=(OPS.throughput.active[3]/1000).toFixed(2);
+  document.getElementById('ops-thru-kpi').textContent=`Mar-26: ${lastThru} MWh`;
+  if(opsCharts['ops-thru'])opsCharts['ops-thru'].destroy();
+  opsCharts['ops-thru']=new Chart(document.getElementById('ops-thru'),{type:'bar',
+    data:{labels:MO_OPS,datasets:[
+      {label:'Anclados',data:OPS.throughput.anchored.map(v=>+(v/1000).toFixed(2)),backgroundColor:'rgba(31,85,86,0.75)',borderRadius:3,stack:'s'},
+      {label:'Pure Dest.',data:OPS.throughput.pureDest.map(v=>+(v/1000).toFixed(2)),backgroundColor:'rgba(17,171,171,0.75)',borderRadius:3,stack:'s'},
+      {label:'DAE',data:OPS.throughput.dae.map(v=>+(v/1000).toFixed(2)),backgroundColor:'rgba(92,200,200,0.75)',borderRadius:3,stack:'s'},
+      {label:'RHF',data:OPS.throughput.rhf.map(v=>+(v/1000).toFixed(2)),backgroundColor:'rgba(166,166,166,0.6)',borderRadius:3,stack:'s'},
+    ]},options:{...opts,scales:{...opts.scales,x:{...opts.scales.x,stacked:true},y:{...opts.scales.y,stacked:true,ticks:{...opts.scales.y.ticks,callback:v=>v+'MWh'}}}}});
+  buildLegend('ops-thru-legend','ops-thru',[{label:'Anclados',color:FOREST},{label:'Pure Dest.',color:TEAL},{label:'DAE',color:'#5cc8c8'},{label:'RHF',color:GRAY}]);
+
+  // Utilization %
+  document.getElementById('ops-util-kpi').textContent=`Activos Mar-26: ${(OPS.utilization.active[3]*100).toFixed(1)}%`;
+  if(opsCharts['ops-util'])opsCharts['ops-util'].destroy();
+  opsCharts['ops-util']=new Chart(document.getElementById('ops-util'),{type:'line',
+    data:{labels:MO_OPS,datasets:[
+      {label:'Activos',data:OPS.utilization.active.map(v=>+(v*100).toFixed(1)),borderColor:TEAL,borderWidth:2.5,pointRadius:4,pointBackgroundColor:TEAL,pointBorderColor:'#fff',pointBorderWidth:1.5,tension:0.4,fill:false},
+      {label:'Anclados',data:OPS.utilization.anchored.map(v=>+(v*100).toFixed(1)),borderColor:FOREST,borderWidth:2,pointRadius:3,pointBackgroundColor:FOREST,pointBorderColor:'#fff',pointBorderWidth:1,tension:0.4,fill:false},
+      {label:'Pure Dest.',data:OPS.utilization.pureDest.map(v=>+(v*100).toFixed(1)),borderColor:GRAY,borderWidth:1.5,borderDash:[4,3],pointRadius:3,pointBackgroundColor:GRAY,tension:0.4,fill:false},
+    ]},options:{...opts,scales:{...opts.scales,y:{...opts.scales.y,ticks:{...opts.scales.y.ticks,callback:v=>v+'%'}}}}});
+  buildLegend('ops-util-legend','ops-util',[{label:'Activos',color:TEAL},{label:'Anclados',color:FOREST},{label:'Pure Dest.',color:GRAY}]);
+
+  // Revenue per connector
+  document.getElementById('ops-revc-kpi').textContent=`Mar-26: $${OPS.revPerConn[3].toLocaleString('es-MX',{maximumFractionDigits:0})}`;
+  if(opsCharts['ops-revc'])opsCharts['ops-revc'].destroy();
+  opsCharts['ops-revc']=new Chart(document.getElementById('ops-revc'),{type:'line',
+    data:{labels:MO_OPS,datasets:[
+      {label:'Rev/Conector',data:OPS.revPerConn,borderColor:FOREST,borderWidth:2.5,backgroundColor:ctx=>makeGrad(ctx,FOREST,160,0.12),fill:true,pointRadius:4,pointBackgroundColor:FOREST,pointBorderColor:'#fff',pointBorderWidth:1.5,tension:0.4},
+    ]},options:{...opts,scales:{...opts.scales,y:{...opts.scales.y,ticks:{...opts.scales.y.ticks,callback:v=>'$'+v.toLocaleString('es-MX')}}}}});
+}
+
+function buildOpsTable(){
+  const MO=['Dic-25','Ene-26','Feb-26','Mar-26','Abr-26'];
+
+  const METRICS=[
+    {id:'ops1',num:'1',title:'Portafolio Installed Capacity',preview:'Active Abr-26: 25.4 MW',
+     rows:[
+      {label:'Active',data:[19.3858,19.4818,19.6618,25.3674,28.6444],bold:true},
+      {label:'Anchored',data:[11.48,11.48,11.48,16.64,17.84]},
+      {label:'Pure Destination',data:[4.8458,4.9418,4.9418,5.2474,5.6444]},
+      {label:'RHF Destination',data:[0.0,0.0,0.18,0.42,0.6]},
+      {label:'DAE',data:[3.06,3.06,3.06,3.06,4.56]},
+      {label:'New Installed',data:[0.0,0.0,0.0,0.0,1.5],shade:true},
+      {label:'  Anchored',data:[null,null,null,null,null],shade:true},
+      {label:'  Pure Destination',data:[35.5524,38.6964,40.5364,39.1392,42.297],shade:true},
+      {label:'  RHF Destination',data:[25.62,28.86,31.06,29.38,32.74],shade:true},
+      {label:'Backlog',data:[7.9188,7.8228,7.8228,7.7456,7.7234],shade:true},
+      {label:'  Anchored',data:[2.0136,2.0136,1.6536,2.0136,1.8336],shade:true},
+      {label:'  Pure Destination',data:[0.0,0.0,0.0,0.0,0.0],shade:true},
+      {label:'  RHF Destination',data:[null,null,null,null,null],shade:true},
+    ]},
+    {id:'ops2',num:'2',title:'Portafolio Contracted Capacity',preview:'Active Abr-26: 20.4 MW',
+     rows:[
+      {label:'Active',data:[null,null,null,null,null],bold:true},
+      {label:'Anchored',data:[3.9264,0.096,0.18,5.7056,3.277]},
+      {label:'Pure Destination',data:[4.8458,4.9418,4.9418,5.2474,5.6444]},
+      {label:'RHF Destination',data:[0.0,0.0,0.18,0.42,0.6]},
+      {label:'DAE',data:[3.06,3.06,3.06,3.06,4.56]},
+      {label:'New Installed',data:[null,null,null,null,null],shade:true},
+      {label:'  Anchored',data:[null,null,null,null,null],shade:true},
+      {label:'  Pure Destination',data:[35.5524,38.6964,40.5364,39.1392,42.297],shade:true},
+      {label:'  RHF Destination',data:[25.62,28.86,31.06,29.38,32.74],shade:true},
+      {label:'Backlog',data:[4.8458,4.9418,4.9418,5.2474,5.6444],shade:true},
+      {label:'  Anchored',data:[0.0,0.0,0.18,0.42,0.6],shade:true},
+      {label:'  Pure Destination',data:[0.0,0.0,0.0,0.0,0.0],shade:true},
+      {label:'  RHF Destination',data:[null,null,null,null,null],shade:true},
+    ]},
+    {id:'ops3',num:'3',title:'Portafolio Connectors',preview:'Active Abr-26: 836',
+     rows:[
+      {label:'Active',data:[718,723,729,836,904],bold:true},
+      {label:'Anchored',data:[216,216,216,300,329]},
+      {label:'Pure Destination',data:[400,405,405,420,437]},
+      {label:'RHF Destination',data:[0,0,6,14,20]},
+      {label:'DAE',data:[102,102,102,102,118]},
+      {label:'New Installed',data:[null,null,null,null,null],shade:true},
+      {label:'  Anchored',data:[77,5,6,107,68],shade:true},
+      {label:'  Pure Destination',data:[60,0,0,92,29],shade:true},
+      {label:'  RHF Destination',data:[17,5,0,15,17],shade:true},
+      {label:'Backlog',data:[0,0,6,0,6],shade:true},
+      {label:'  Anchored',data:[426,480,517,487],shade:true},
+      {label:'  Pure Destination',data:[317,312,312,279],shade:true},
+      {label:'  RHF Destination',data:[70,70,58,70],shade:true},
+    ]},
+    {id:'ops4',num:'4',title:'Portfolio Underwritten IRR',preview:'Active Abr-26: 22.1%',
+     rows:[
+      {label:'Active',data:[0.2208,0.2205,0.2206,0.2308,0.2209],fmt:'pct',bold:true},
+      {label:'Anchored',data:[0.209,0.209,0.209,0.2269,0.2155],fmt:'pct'},
+      {label:'Pure Destination',data:[0.2488,0.2471,0.2471,0.243,0.2403],fmt:'pct'},
+      {label:'RHF Destination',data:[null,null,0.231,0.231,0.199],fmt:'pct'},
+    ]},
+    {id:'ops5',num:'5',title:'Throughput',preview:'Active Abr-26: 2,445.0',
+     rows:[
+      {label:'Active',data:[2094.3706,2127.144,2116.1611,2493.3847,2444.9934],bold:true},
+      {label:'Anchored',data:[1132.7105,1206.4258,1201.125,1419.3322,1426.4547]},
+      {label:'Pure Destination',data:[177.0791,176.4931,181.0813,197.051,203.6329]},
+      {label:'RHF Destination',data:[null,null,1.4766,26.1195,37.243]},
+      {label:'DAE',data:[784.581,744.225,732.4782,850.882,777.6628]},
+    ]},
+    {id:'ops6',num:'6',title:'Network Throughput Utilization',preview:'Active Abr-26: 20.0%',
+     rows:[
+      {label:'Active',data:[0.2154,0.1969,0.2084,0.2,0.1758],fmt:'pct',bold:true},
+      {label:'Anchored',data:[0.2651,0.2276,0.2509,0.205,0.1822],fmt:'pct'},
+      {label:'Pure Destination',data:[0.0518,0.0487,0.0549,0.0502,0.0522],fmt:'pct'},
+      {label:'RHF Destination',data:[null,null,0.0427,0.0836,0.1105],fmt:'pct'},
+      {label:'DAE',data:[0.4056,0.4135,0.4192,0.4399,0.4169],fmt:'pct'},
+    ]},
+    {id:'ops7',num:'7',title:'Total Revenues',preview:'Total Abr-26: $12,096,767',
+     rows:[
+      {label:'Total',data:[9712384.8159,10200185.3497,10133778.3379,12096766.9961,12179020.2888],fmt:'curr',bold:true},
+      {label:'Anchored',data:[8251500.7986,8714941.8238,8593467.2345,10175706.8754,9815984.0302],fmt:'curr'},
+      {label:'Pure Destination',data:[1460884.0172,1485243.5259,1526710.7759,1688496.181,2048893.7586],fmt:'curr'},
+      {label:'RHF Destination',data:[0.0,0.0,13600.3276,232563.9397,314142.5],fmt:'curr'},
+    ]},
+    {id:'ops8',num:'8',title:'Avg. Revenue per kWh',preview:'Total Abr-26: $7.4',
+     rows:[
+      {label:'Total',data:[7.4152,7.3758,7.3238,7.3648,7.3045],fmt:'$',bold:true},
+      {label:'Anchored',data:[7.2847,7.2238,7.1545,7.1694,6.8814],fmt:'$'},
+      {label:'Pure Destination',data:[8.2499,8.4153,8.4311,8.5688,10.0617],fmt:'$'},
+      {label:'RHF Destination',data:[null,null,9.2106,8.9038,8.4349],fmt:'$'},
+    ]},
+    {id:'ops9',num:'9',title:'Gross Profit per kWh ($)',preview:'Total Abr-26: $1.2',
+     rows:[{label:'Total',data:[-5.7898,1.5845,1.4194,1.1545,1.2217],fmt:'$',bold:true}]},
+    {id:'ops10',num:'10',title:'Gross Profit Margin per kWh (%)',preview:'Total Abr-26: 15.7%',
+     rows:[{label:'Total',data:[-0.7808,0.2595,0.1938,0.1568,0.1672],fmt:'pct',bold:true}]},
+    {id:'ops11',num:'11',title:'Avg. Revenue per installed connector',preview:'Total Abr-26: $16,481',
+     rows:[
+      {label:'Total',data:[15766.8585,16425.4192,16162.3259,16480.609,15534.4647],fmt:'curr',bold:true},
+      {label:'Anchored',data:[38201.3926,40346.9529,39784.5705,33919.0229,28618.0292],fmt:'curr'},
+      {label:'Pure Destination',data:[3652.21,3667.268,3769.6562,4020.229,4878.3185],fmt:'curr'},
+      {label:'RHF Destination',data:[null,null,2266.7213,16611.71,22438.75],fmt:'curr'},
+    ]},
+    {id:'ops12',num:'12',title:'Uptime (%)',preview:'Total Abr-26: 99.1%',
+     rows:[
+      {label:'Total',data:[0.987,0.9919,0.9806,0.9909,0.9827],fmt:'pct',bold:true},
+      {label:'Anchored',data:[0.9985,0.9975,0.9982,0.9982,0.9919],fmt:'pct'},
+      {label:'Pure Destination',data:[0.9596,0.9789,0.9753,0.9697,0.9516],fmt:'pct'},
+      {label:'RHF Destination',data:[null,null,null,0.9647,1.0],fmt:'pct'},
+    ]},
+    {id:'ops13',num:'13',title:'CAPEX / kW',preview:'Total Abr-26: $13,010.5',
+     rows:[
+      {label:'Total',data:[13196.4205,4941.4491,9685.9593,13010.5409,11678.4468],fmt:'$',bold:true},
+      {label:'Anchored',data:[13511.0417,null,null,12663.1762,10466.0],fmt:'$'},
+      {label:'Pure Destination',data:[6800.873,4941.4491,null,14400.0,14200.0],fmt:'$'},
+      {label:'RHF Destination',data:[null,null,9685.9593,null,14200.0],fmt:'$'},
+    ]},
+    {id:'ops14',num:'14',title:'EV Connector Ratio',preview:'Anchored Abr-26: 5.6',
+     rows:[
+      {label:'Anchored',data:[6.5185,6.7778,7.3472,5.56,5.386],bold:true},
+      {label:'Pure Destination',data:[7.5139,7.7222,8.5093,6.4567,6.0851]},
+    ]},
+  ];
+
+  function fv(v,fmt){
+    if(v===null||v===undefined)return '—';
+    if(fmt==='pct')return (v*100).toFixed(1)+'%';
+    if(fmt==='curr')return '$'+Number(v).toLocaleString('es-MX',{maximumFractionDigits:0});
+    if(fmt==='$')return '$'+Number(v).toFixed(1);
+    return Number(v).toFixed(1);
+  }
+
+  const wrap=document.getElementById('ops-tbl').parentElement;
+  wrap.innerHTML=`
+    <div class="section-head" style="margin-bottom:16px;margin-top:8px;">
+      Tabla de Métricas Operacionales
+      <span class="section-note">Dic 2025 · Ene-Abr 2026 · clic en sección para expandir</span>
+    </div>
+    <div id="ops-acc" style="border:1px solid rgba(31,85,86,0.15);border-radius:6px;overflow:hidden;"></div>`;
+
+  const acc=document.getElementById('ops-acc');
+  METRICS.forEach((m,idx)=>{
+    // Header row
+    const hdr=document.createElement('div');
+    hdr.style.cssText=`display:flex;align-items:center;justify-content:space-between;padding:11px 16px;cursor:pointer;background:var(--white);border-bottom:${idx<METRICS.length-1?'1px solid rgba(31,85,86,0.1)':'none'};transition:background 0.12s;`;
+    hdr.onmouseenter=()=>{if(!hdr._open)hdr.style.background='rgba(17,171,171,0.04)';};
+    hdr.onmouseleave=()=>{if(!hdr._open)hdr.style.background='var(--white)';};
+    hdr.innerHTML=`
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div style="width:24px;height:24px;border-radius:50%;background:var(--teal);color:#fff;font-size:10px;font-family:'Space Grotesk',sans-serif;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${m.num}</div>
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;color:var(--forest);">${m.title}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:16px;">
+        <span style="font-size:11px;color:var(--text3);">${m.preview}</span>
+        <span id="ops-arr-${m.id}" style="font-size:13px;color:var(--teal);font-weight:700;transition:transform 0.2s;display:inline-block;">▸</span>
+      </div>`;
+
+    // Body (hidden by default)
+    const body=document.createElement('div');
+    body.id='ops-body-'+m.id;
+    body.style.cssText='display:none;border-top:1px solid rgba(17,171,171,0.2);';
+    let tblH=`<div style="overflow-x:auto;"><table style="border-collapse:collapse;width:100%;min-width:400px;font-size:12px;">`;
+    tblH+=`<thead><tr>`;
+    tblH+=`<th style="background:rgba(17,171,171,0.08);padding:7px 16px;text-align:left;font-size:10px;font-weight:700;color:var(--forest);text-transform:uppercase;letter-spacing:0.06em;border-bottom:1px solid rgba(31,85,86,0.1);">Concepto</th>`;
+    MO.forEach(mo=>tblH+=`<th style="background:rgba(17,171,171,0.08);padding:7px 12px;text-align:right;font-size:10px;font-weight:700;color:var(--forest);text-transform:uppercase;letter-spacing:0.06em;border-bottom:1px solid rgba(31,85,86,0.1);">${mo}</th>`);
+    tblH+=`</tr></thead><tbody>`;
+    m.rows.forEach(r=>{
+      const bg=r.shade?'background:rgba(17,171,171,0.04);':'';
+      const bold=r.bold?'font-weight:700;color:var(--forest);':'color:var(--text2);';
+      tblH+=`<tr><td style="padding:7px 16px;border-bottom:1px solid rgba(31,85,86,0.06);${bg}${bold}">${r.label}</td>`;
+      r.data.forEach(v=>{
+        const neg=v!==null&&v<0?'color:var(--red);':'';
+        const vbold=r.bold?'font-weight:700;':'';
+        tblH+=`<td style="padding:7px 12px;text-align:right;border-bottom:1px solid rgba(31,85,86,0.06);font-variant-numeric:tabular-nums;${bg}${neg}${vbold}">${fv(v,r.fmt)}</td>`;
+      });
+      tblH+=`</tr>`;
+    });
+    tblH+=`</tbody></table></div>`;
+    body.innerHTML=tblH;
+
+    hdr.onclick=()=>{
+      const open=body.style.display==='block';
+      body.style.display=open?'none':'block';
+      hdr._open=!open;
+      hdr.style.background=open?'var(--white)':'rgba(17,171,171,0.05)';
+      const arr=document.getElementById('ops-arr-'+m.id);
+      if(arr) arr.style.transform=open?'rotate(0deg)':'rotate(90deg)';
+    };
+
+    acc.appendChild(hdr);
+    acc.appendChild(body);
+  });
+
+  window._opsFv=fv;
+}
+
+
+// ── NAV BAR ──
+function navTo(id){
+  const el=document.getElementById(id);
+  if(!el) return;
+  const offset=70;
+  const top=el.getBoundingClientRect().top+window.scrollY-offset;
+  window.scrollTo({top,behavior:'smooth'});
+  setNavActive(id);
+}
+
+function setNavActive(id){
+  document.querySelectorAll('.dash-nav-btn').forEach(b=>b.classList.remove('active'));
+  const map={'sec-resumen':0,'sec-variacion':1,'sec-graficas':[2,3,4],'sec-budget':5,'sec-ops':7};
+  const idx=map[id];
+  const btns=document.querySelectorAll('.dash-nav-btn');
+  if(Array.isArray(idx)) idx.forEach(i=>btns[i]?.classList.add('active'));
+  else if(idx!==undefined) btns[idx]?.classList.add('active');
+}
+
+// Scroll spy
+const _sections=['sec-ops','sec-resumen','sec-variacion','sec-graficas','sec-budget'];
+window.addEventListener('scroll',()=>{
+  let current='sec-resumen';
+  _sections.forEach(id=>{
+    const el=document.getElementById(id);
+    if(el&&el.getBoundingClientRect().top<=80) current=id;
+  });
+  setNavActive(current);
+},{passive:true});
+
+// ── OPS SUMMARY ──
+function buildOpsSummary(){
+  const MO_OPS_S=['Dic-25','Ene-26','Feb-26','Mar-26','Abr-26'];
+
+  // Data indexed [Dic-25, Ene-26, Feb-26, Mar-26]
+  const OPS_S={
+    // Active row (idx 0) for metrics 1-6
+    installed:   [19.3858,19.4818,19.6618,25.3674,28.6444],
+    contracted:  [15.6158,15.7118,15.8918,20.4274,23.2544],
+    connectors:  [718,723,729,836,904],
+    irr:         [0.2208,0.2205,0.2206,0.2308,0.2209],
+    throughput:  [2094.3706,2127.144,2116.1611,2493.3847,2444.9934],
+    utilization: [0.2154,0.1969,0.2084,0.2,0.1758],
+    // Total row for metrics 7-14
+    revenues:    [9712384.8159,10200185.3497,10133778.3379,12096766.9961,12179020.2888],
+    revPerKwh:   [7.4152,7.3758,7.3238,7.3648,7.3045],
+    gpPerKwh:    [-5.7898,1.5845,1.4194,1.1545,1.2217],
+    gpMargin:    [-0.7808,0.2595,0.1938,0.1568,0.1672],
+    revPerConn:  [15766.8585,16425.4192,16162.3259,16480.609,15534.4647],
+    uptime:      [0.987,0.9919,0.9806,0.9909,0.9827],
+    capex:       [13196.4205,4941.4491,9685.9593,13010.5409,11678.4468],
+    evRatio:     [6.5185,6.7778,7.3472,5.56,5.386],
+  };
+
+  function fmtS(v,fmt){
+    if(v===null||v===undefined) return '—';
+    if(fmt==='pct') return (v*100).toFixed(1)+'%';
+    if(fmt==='mxn') return '$'+Number(v/1e6).toFixed(1)+'M';
+    if(fmt==='curr') return '$'+Number(v).toLocaleString('es-MX',{maximumFractionDigits:0});
+    if(fmt==='$') return '$'+Number(v).toLocaleString('es-MX',{minimumFractionDigits:1,maximumFractionDigits:1});
+    if(fmt==='int') return Number(v).toLocaleString('es-MX');
+    return Number(v).toLocaleString('es-MX',{minimumFractionDigits:1,maximumFractionDigits:1});
+  }
+
+  function getMetrics(i){
+    return [
+      {num:'1', title:'Portafolio Installed Capacity', val:OPS_S.installed[i],   unit:'MW', fmt:'num', sub:'Active'},
+      {num:'2', title:'Portafolio Contracted Capacity',val:OPS_S.contracted[i],  unit:'MW', fmt:'num', sub:'Active'},
+      {num:'3', title:'Portafolio Connectors',          val:OPS_S.connectors[i],  unit:'',   fmt:'int', sub:'Active'},
+      {num:'4', title:'Portfolio Underwritten IRR',     val:OPS_S.irr[i],         unit:'',   fmt:'pct', sub:'Active'},
+      {num:'5', title:'Throughput',                     val:OPS_S.throughput[i],  unit:'kWh',fmt:'num', sub:'Active'},
+      {num:'6', title:'Network Throughput Utilization', val:OPS_S.utilization[i], unit:'',   fmt:'pct', sub:'Active'},
+      {num:'7', title:'Total Revenues',                 val:OPS_S.revenues[i],    unit:'',   fmt:'mxn', sub:'Total'},
+      {num:'8', title:'Avg. Revenue per kWh',           val:OPS_S.revPerKwh[i],   unit:'',   fmt:'$',   sub:'Total'},
+      {num:'9', title:'Gross Profit per kWh',           val:OPS_S.gpPerKwh[i],    unit:'',   fmt:'$',   sub:'Total'},
+      {num:'10',title:'GP Margin per kWh',              val:OPS_S.gpMargin[i],    unit:'',   fmt:'pct', sub:'Total'},
+      {num:'11',title:'Avg. Revenue per Connector',     val:OPS_S.revPerConn[i],  unit:'',   fmt:'curr',sub:'Total'},
+      {num:'12',title:'Uptime',                         val:OPS_S.uptime[i],      unit:'',   fmt:'pct', sub:'Total'},
+      {num:'13',title:'CAPEX / kW',                     val:OPS_S.capex[i],       unit:'',   fmt:'$',   sub:'Total'},
+      {num:'14',title:'EV Connector Ratio (Anchored)',  val:OPS_S.evRatio[i],     unit:'',   fmt:'num', sub:'Anchored'},
+    ];
+  }
+
+  let selIdx=4; // default Abr-26
+
+  function renderGrid(){
+    const grid=document.getElementById('ops-summary-grid');
+    const metrics=getMetrics(selIdx);
+    const metricsPrev=selIdx>0?getMetrics(selIdx-1):null;
+    const cols=4; const total=metrics.length;
+    grid.innerHTML='';
+    metrics.forEach((s,i)=>{
+      const isLastRow=i>=total-cols;
+      const isLastCol=(i+1)%cols===0;
+      const card=document.createElement('div');
+      card.className='kpi-card';
+      card.style.cssText=`${isLastRow?'border-bottom:none;':''}${isLastCol?'border-right:none;':''}`;
+      const isNeg=s.val<0;
+      const vc=isNeg?'color:var(--red);':parseInt(s.num)<=6?'color:var(--teal);':'color:var(--forest);';
+
+      // MoM variation
+      let varHtml='';
+      if(metricsPrev){
+        const prev=metricsPrev[i].val;
+        const cur=s.val;
+        if(prev!==null&&prev!==0&&cur!==null){
+          const delta=cur-prev;
+          const pctV=(delta/Math.abs(prev)*100);
+          // for metrics where up=good (1,2,3,5,7,8,11) vs neutral/mixed
+          const goodUp=[1,2,3,5,7,8,9,11,12].includes(parseInt(s.num));
+          const cls=pctV>0?(goodUp?'up':'dn'):pctV<0?(goodUp?'dn':'up'):'neu';
+          const arrow=pctV>0?'↑':'↓';
+          varHtml=`<span class="kdelta" style="margin-top:4px;display:flex;align-items:center;gap:4px;">
+            <span class="kdelta-lbl">MoM</span>
+            <span class="kdelta-val ${cls}">${arrow} ${Math.abs(pctV).toFixed(1)}%</span>
+          </span>`;
+        }
+      }
+
+      card.innerHTML=`
+        <div style="display:flex;align-items:center;gap:7px;margin-bottom:6px;">
+          <div style="width:18px;height:18px;border-radius:50%;background:var(--teal);color:#fff;font-size:8px;font-family:'Space Grotesk',sans-serif;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${s.num}</div>
+          <div class="kpi-name" style="margin-bottom:0;">${s.title}</div>
+        </div>
+        <div class="kpi-value" style="font-size:22px;${vc}">${fmtS(s.val,s.fmt)}${s.unit?' <span style="font-size:12px;font-weight:400;color:var(--text3);">'+s.unit+'</span>':''}</div>
+        <div class="kpi-period">${s.sub} · ${MO_OPS_S[selIdx]}</div>
+        <div class="kpi-deltas">${varHtml}</div>`;
+      card.style.cursor='pointer';
+      card.style.transition='box-shadow 0.15s';
+      card.onmouseenter=()=>card.style.boxShadow='0 2px 12px rgba(17,171,171,0.15)';
+      card.onmouseleave=()=>card.style.boxShadow='';
+      (function(num){
+        card.onclick=()=>openOpsChart(num);
+      })(parseInt(s.num));
+      grid.appendChild(card);
+    });
+  }
+
+  // Build selector bar
+  const section=document.getElementById('ops-summary-grid');
+  const barDiv=document.createElement('div');
+  barDiv.id='ops-period-bar';
+  barDiv.style.cssText='display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:16px;background:var(--white);border:1px solid rgba(31,85,86,0.15);border-radius:8px;padding:8px 12px;';
+  barDiv.innerHTML=MO_OPS_S.map((m,i)=>`<button class="gp-btn ${i===selIdx?(i===MO_OPS_S.length-1?'active-latest':'active-month'):''}" id="ops-mo-btn-${i}" onclick="opsSetMonth(${i})">${m}</button>`).join('');
+  section.parentElement.insertBefore(barDiv, section);
+
+  window.opsSetMonth=function(i){
+    selIdx=i;
+    MO_OPS_S.forEach((_,j)=>{
+      const b=document.getElementById(`ops-mo-btn-${j}`);
+      if(b){
+        b.classList.remove('active','active-month','active-latest');
+        if(j===selIdx) b.classList.add(j===MO_OPS_S.length-1?'active-latest':'active-month');
+      }
+    });
+    renderGrid();
+  };
+
+  renderGrid();
+}
+
+// ── OPS CHART PANEL ──
+let _opsChart=null;
+
+const OPS_CHART_DATA={
+  1:{title:'1) Portafolio Installed Capacity',unit:'MW',
+     series:[
+       {label:'Active',     data:[19.3858,19.4818,19.6618,25.3674,28.6444],color:TEAL},
+       {label:'Anchored',   data:[11.48,11.48,11.48,16.64,17.84],        color:FOREST},
+       {label:'Pure Dest.', data:[4.8458,4.9418,4.9418,5.2474,5.6444],    color:'#5cc8c8'},
+       {label:'DAE',        data:[3.06,3.06,3.06,3.06,4.56],            color:GRAY},
+     ]},
+  2:{title:'2) Portafolio Contracted Capacity',unit:'MW',
+     series:[
+       {label:'Active',     data:[15.6158,15.7118,15.8918,20.4274,23.2544],color:TEAL},
+       {label:'Anchored',   data:[7.71,7.71,7.71,11.7,13.3465],            color:FOREST},
+       {label:'Pure Dest.', data:[4.8458,4.9418,4.9418,5.2474,5.6444],    color:'#5cc8c8'},
+       {label:'DAE',        data:[3.06,3.06,3.06,3.06,4.56],            color:GRAY},
+     ]},
+  3:{title:'3) Portafolio Connectors',unit:'',
+     series:[
+       {label:'Active',     data:[718,723,729,836,904],  color:TEAL},
+       {label:'Anchored',   data:[216,216,216,300,329],  color:FOREST},
+       {label:'Pure Dest.', data:[400,405,405,420,437],  color:'#5cc8c8'},
+       {label:'DAE',        data:[102,102,102,102,118],  color:GRAY},
+     ]},
+  4:{title:'4) Portfolio Underwritten IRR',unit:'%',pct:true,
+     series:[
+       {label:'Active',     data:[22.08,22.05,22.06,23.08,22.09],color:TEAL},
+       {label:'Anchored',     data:[20.9,20.9,20.9,22.689999999999998,21.55],color:FOREST},
+       {label:'Pure Dest.', data:[24.88,24.71,24.71,24.3,24.03],color:'#5cc8c8'},
+     ]},
+  5:{title:'5) Throughput (kWh)',unit:'kWh',
+     series:[
+       {label:'Active',     data:[2094.4,2127.1,2116.2,2493.4,2445.0],color:TEAL},
+       {label:'Anchored',   data:[1132.7,1206.4,1201.1,1419.3,1426.5],color:FOREST},
+       {label:'Pure Dest.', data:[177.1,176.5,181.1,197.1,203.6],    color:'#5cc8c8'},
+       {label:'DAE',        data:[784.6,744.2,732.5,850.9,777.7],    color:GRAY},
+     ]},
+  6:{title:'6) Network Throughput Utilization',unit:'%',
+     series:[
+       {label:'Active',     data:[21.5,19.7,20.8,20.0,17.6],color:TEAL},
+       {label:'Anchored',   data:[26.5,22.8,25.1,20.5,18.2],color:FOREST},
+       {label:'Pure Dest.', data:[5.2,4.9,5.5,5.0,5.2],   color:'#5cc8c8'},
+       {label:'DAE',        data:[40.6,41.4,41.9,44.0,41.7],color:GRAY},
+     ]},
+  7:{title:'7) Total Revenues (MXN)',unit:'MXN',
+     series:[
+       {label:'Total',        data:[9712385,10200185,10133778,12096767,12179020],color:TEAL},
+       {label:'Anchored',     data:[8251501,8714942,8593467,10175707,9815984], color:FOREST},
+       {label:'Pure Dest.',   data:[1460884,1485244,1526711,1688496,2048894],  color:'#5cc8c8'},
+     ]},
+  8:{title:'8) Avg. Revenue per kWh ($)',unit:'$',
+     series:[
+       {label:'Total',        data:[7.4,7.4,7.3,7.4,7.3],color:TEAL},
+       {label:'Anchored',     data:[7.3,7.2,7.2,7.2,6.9],color:FOREST},
+       {label:'Pure Dest.',   data:[8.2,8.4,8.4,8.6,10.1],color:'#5cc8c8'},
+     ]},
+  9:{title:'9) Gross Profit per kWh ($)',unit:'$',
+     series:[{label:'Total',data:[-5.8,1.6,1.4,1.2,1.2],color:TEAL}]},
+  10:{title:'10) GP Margin per kWh (%)',unit:'%',
+     series:[{label:'Total',data:[-78.1,25.9,19.4,15.7,16.7],color:TEAL}]},
+  11:{title:'11) Avg. Revenue per Connector (MXN)',unit:'MXN',
+     series:[
+       {label:'Total',      data:[15767,16425,16162,16481,15534],color:TEAL},
+       {label:'Anchored',   data:[38201,40347,39785,33919,28618],color:FOREST},
+       {label:'Pure Dest.', data:[3652,3667,3770,4020,4878],    color:'#5cc8c8'},
+     ]},
+  12:{title:'12) Uptime (%)',unit:'%',
+     series:[
+       {label:'Total',      data:[98.7,99.2,98.1,99.1,98.3],color:TEAL},
+       {label:'Anchored',   data:[99.9,99.8,99.8,99.8,99.2],color:FOREST},
+       {label:'Pure Dest.', data:[95.9,97.9,97.5,96.9,95.2],color:'#5cc8c8'},
+     ]},
+  13:{title:'13) CAPEX / kW ($)',unit:'$',
+     series:[{label:'Total',data:[13196.4,4941.4,9685.9,13010.5,11678.4],color:TEAL}]},
+  14:{title:'14) EV Connector Ratio',unit:'',
+     series:[
+       {label:'Anchored',   data:[6.5,6.8,7.3,5.6,5.4],color:TEAL},
+       {label:'Pure Dest.', data:[7.5,7.7,8.5,6.5,6.1],color:FOREST},
+     ]},
+};
+const MO_OPS_C=['Dic-25','Ene-26','Feb-26','Mar-26','Abr-26'];
+
+function openOpsChart(num){
+  const cfg=OPS_CHART_DATA[num];
+  if(!cfg)return;
+  const panel=document.getElementById('ops-chart-panel');
+  document.getElementById('ops-chart-title').textContent=cfg.title;
+  panel.style.display='block';
+  panel.scrollIntoView({behavior:'smooth',block:'nearest'});
+  if(_opsChart){_opsChart.destroy();_opsChart=null;}
+
+  // Stacked area — reverse series order so Active is on top visually
+  const reversed=[...cfg.series].reverse();
+  const datasets=reversed.map((s,i)=>({
+    label:s.label,
+    data:s.data,
+    borderColor:s.color,
+    backgroundColor:s.color+'66',
+    fill:true,
+    tension:0.4,
+    borderWidth:2,
+    pointRadius:4,
+    pointBackgroundColor:s.color,
+    pointBorderColor:'#fff',
+    pointBorderWidth:1.5,
+    pointHoverRadius:6,
+  }));
+
+  _opsChart=new Chart(document.getElementById('ops-chart-canvas'),{
+    type:'line',
+    data:{labels:MO_OPS_C, datasets},
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          ...ttip,
+          callbacks:{
+            label:ctx=>` ${ctx.dataset.label}: ${ctx.raw}${cfg.unit==='%'?'%':cfg.unit?' '+cfg.unit:''}`
+          }
+        }
+      },
+      scales:{
+        x:{
+          stacked:true,
+          grid:{display:false},border:{display:false},
+          ticks:{color:tc,font:{size:12}}
+        },
+        y:{
+          stacked:true,
+          grid:{color:gridC},border:{display:false},
+          ticks:{color:tc,font:{size:11},callback:v=>v+(cfg.unit==='%'?'%':'')}
+        }
+      }
+    }
+  });
+
+  // legend — show in original order
+  const leg=document.getElementById('ops-chart-legend');
+  leg.innerHTML=cfg.series.map(s=>`
+    <div class="chart-legend-item">
+      <span style="width:12px;height:12px;border-radius:2px;background:${s.color}88;border:1.5px solid ${s.color};display:inline-block;flex-shrink:0;"></span>
+      ${s.label}
+    </div>`).join('');
+}
+
+function closeOpsChart(){
+  document.getElementById('ops-chart-panel').style.display='none';
+  if(_opsChart){_opsChart.destroy();_opsChart=null;}
+}
+
+// INIT
+buildKPIs();
+initGlobalPeriodBar();
+setGlobalPeriod(15);
+initSelectors();
+buildComparisons();
+initBigCharts();
+buildBudgetKPIs();
+buildBudgetCharts();
+buildBudgetTable();
+buildOpsTable();
+buildOpsSummary();
+</script>
+</body>
+</html>
