@@ -893,17 +893,7 @@ async function loadData() {
 }
 
 const round3=v=>Math.round(v*1000)/1000;
-D.EBITDAadj={vals:D.EBITDA.vals.map((v,i)=>v-crossSGA[i]-corpGA[i]-corpBonus[i]),children:{}};
-D.NIadj={vals:D.NI.vals.map((v,i)=>Math.round((v-nonOp[i])*1000)/1000),children:{}};
-D.CorpBonus={vals:corpBonus,children:{}};
-D.CrossSGA={vals:crossSGA,children:{}};
-D.CorpGA={vals:corpGA,children:{}};
-D.CrossCorp={vals:D.SGA.vals.map((v,i)=>Math.round((v+crossSGA[i]+corpGA[i]+corpBonus[i])*1000)/1000),children:{
-  'Direct SG&A':D.SGA.vals,
-  'Cross Functional SG&A':crossSGA,
-  'Corporate G&A':corpGA,
-  'Corporate Bonus':corpBonus,
-}};
+// derived entries built inside loadData()
 
 
 const s12=a=>a.slice(0,12).reduce((x,y)=>x+y,0);
