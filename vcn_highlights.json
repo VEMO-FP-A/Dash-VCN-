@@ -1,0 +1,21 @@
+{
+  "_TEMPLATE_NEW_MONTH": {
+    "_instrucciones": "Copia este bloque para agregar un mes nuevo. Reemplaza la llave por el mes (ej. 'May-26'). Escribe 3-5 highlights y 3-5 lowlights. Body soporta numeros, %, $X.Xm, bps.",
+    "highlights": [
+      {"title": "Revenue YTD", "body": "YTD revenue $XXX +X.X% vs Budget ($YYY)."},
+      {"title": "EBITDA", "body": "EBITDA $X.Xm vs Budget $Y.Ym."}
+    ],
+    "lowlights": [
+      {"title": "Performance Ratio", "body": "PR XX.X% vs target 80% (-X bps)."},
+      {"title": "Churn", "body": "Churn XX.X% (target <25%)."}
+    ]
+  },
+  "Jan-26": {
+    "highlights": [],
+    "lowlights": []
+  },
+  "Feb-26": {
+    "highlights": [],
+    "lowlights": []
+  }
+}
