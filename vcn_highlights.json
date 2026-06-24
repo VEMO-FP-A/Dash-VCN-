@@ -1,21 +1,281 @@
 {
-  "_TEMPLATE_NEW_MONTH": {
-    "_instrucciones": "Copia este bloque para agregar un mes nuevo. Reemplaza la llave por el mes (ej. 'May-26'). Escribe 3-5 highlights y 3-5 lowlights. Body soporta numeros, %, $X.Xm, bps.",
+  "_note": "VCN Monthly Highlights & Lowlights.",
+  "Jan-26": {
     "highlights": [
-      {"title": "Revenue YTD", "body": "YTD revenue $XXX +X.X% vs Budget ($YYY)."},
-      {"title": "EBITDA", "body": "EBITDA $X.Xm vs Budget $Y.Ym."}
+      {
+        "title": "Utilization",
+        "body": "Weighted avg. utilization (throughput-based) reached 19.7% (-185 bps MoM, -58 bps vs. Budget). Anchored LTO: 22.8% (-375 bps MoM); Destination: 4.9% (-31 bps MoM)."
+      },
+      {
+        "title": "VCN Revenue (ex. DAE)",
+        "body": "Revenues (excl. VAT) increased +5.0% MoM, reaching MXN $10.4m. LTO / B2C / DiDi split: 58.6% / 39.4% / 2.0%."
+      },
+      {
+        "title": "Signed Hub - Presa Tepuxtepec (CDMX)",
+        "body": "15-year lease for a 1,758 m2 greenfield site on Av. Anillo Periferico. Capacity: 3.0 MW, 26 dual-connector DC chargers."
+      },
+      {
+        "title": "Watts App - User Growth",
+        "body": "RAU +3.0% to 5,014. MAU +0.3% to 6,876, despite -5.0% decline in NAU."
+      },
+      {
+        "title": "Watts - Fraud Enforcement",
+        "body": "Deployed fraud enforcement enabling blocking of users, cards, and devices linked to chargeback fraud."
+      }
     ],
     "lowlights": [
-      {"title": "Performance Ratio", "body": "PR XX.X% vs target 80% (-X bps)."},
-      {"title": "Churn", "body": "Churn XX.X% (target <25%)."}
+      {
+        "title": "Pre-Development - Av. Colonia del Valle 615",
+        "body": "Negotiations fell through as the owner prioritized a competing self-storage proposal."
+      },
+      {
+        "title": "Permitting Delays",
+        "body": "Several signed hubs facing delays: Merida 77, Mexico-Toluca, Mosqueta, and Vasconcelos."
+      },
+      {
+        "title": "Watts - Session Flow Bug",
+        "body": "Malfunction in charging session close-out flow impacted ~3% of users (reduced to ~1.5% post-remediation)."
+      },
+      {
+        "title": "Watts - Login Disruption",
+        "body": "Login disruption last weekend of January affected ~0.5% of users (reduced to ~0.1% after corrective measures)."
+      }
     ]
   },
-  "Jan-26": {
-    "highlights": [],
-    "lowlights": []
-  },
   "Feb-26": {
-    "highlights": [],
-    "lowlights": []
+    "highlights": [
+      {
+        "title": "Utilization",
+        "body": "Weighted avg. utilization reached 20.8% (+115 bps MoM, -2 bps vs. Budget). DAE chargers: 41.9% (+57 bps); Anchored LTO: 25.6% (+242 bps); Destination: 5.7% (+53 bps)."
+      },
+      {
+        "title": "VCN Revenue (ex. DAE)",
+        "body": "Revenues (excl. VAT) reached MXN $10.4m (-0.1% MoM; 3 fewer calendar days). Per-day basis: +8.7% vs. January. LTO / B2C / DiDi: 57.5% / 40.0% / 2.4%."
+      },
+      {
+        "title": "Signed Hub - Av. Adolfo Lopez Mateos 16 (CDMX)",
+        "body": "20-year lease, 1,279 m2 greenfield. Access to Anillo Periferico, Viaducto, Av. Constituyentes. Capacity: 2.0 MW, 19 DC 120 kW chargers."
+      },
+      {
+        "title": "Transvaal Hub - Construction Complete",
+        "body": "Awaiting CFE energization. Operations began early March with our first BESS energy efficiency system."
+      },
+      {
+        "title": "Destination Sites",
+        "body": "5 new chargers signed (BYD EMSP Tijuana, Grupo Cleber Nuevo Leon). Total: 709 signed, 438 operational."
+      },
+      {
+        "title": "Dynamic Pricing MVP",
+        "body": "Rolling out first Dynamic Pricing initiative; launch planned early April at Petrarca and Roma. Energy costs 14-48% lower vs. peak hours."
+      },
+      {
+        "title": "Watts App - User Growth",
+        "body": "RAU +3.9% to 5,209; MAU +1.6% to 6,989, despite -4.4% decline in NAU."
+      }
+    ],
+    "lowlights": [
+      {
+        "title": "Pre-Development - Conquer",
+        "body": "Not pursued: 30-connector pure destination deal misaligned with asset type and location criteria."
+      },
+      {
+        "title": "Pre-Development - Acosta Verde",
+        "body": "Host selected FAZT due to established long-term relationship. Our assessment identified 10+ locations failing minimum return thresholds."
+      },
+      {
+        "title": "Destination Hubs - Commercial Delays",
+        "body": "Cost estimation bottlenecks from infrastructure team. Mitigating by prioritizing highest-value deals."
+      },
+      {
+        "title": "Permitting Delays",
+        "body": "Ongoing delays for Merida 77, Mexico-Toluca, Mosqueta, and Rio Mississippi. Mitigating through government engagement (joint investment with Monterrey State Governor)."
+      },
+      {
+        "title": "Watts - iOS Login Bug",
+        "body": "Intermittent iOS login bug affected ~90 users/day over 10 days, causing delays up to 10 minutes."
+      }
+    ]
+  },
+  "Mar-26": {
+    "highlights": [
+      {
+        "title": "Utilization",
+        "body": "Weighted avg. utilization reached 20.0% (-84 bps MoM, +178 bps vs. Budget). DAE: 44.0% (+206 bps); Anchored LTO: 20.5% (-510 bps); Destination: 5.0% (-47 bps, +53 bps vs. Budget)."
+      },
+      {
+        "title": "VCN Revenue (ex. DAE)",
+        "body": "Revenues (excl. VAT) increased +21.9% MoM, reaching MXN $12.8m. LTO / B2C / DiDi: 55.5% / 41.4% / 3.1%."
+      },
+      {
+        "title": "Signed Hub - Eje 5 Norte (CDMX)",
+        "body": "15-year lease, 2,306 sqm greenfield on Av. Aquiles Serdan and Calzada Camarones. Capacity: 2.7 MW, 31 DC 120 kW chargers."
+      },
+      {
+        "title": "COD - Aeropuerto Hub (CDMX)",
+        "body": "21 chargers reached COD including our first BESS project (formerly Transvaal Hub)."
+      },
+      {
+        "title": "COD - Las Aguilas Hub (CDMX)",
+        "body": "25 chargers reached COD; 2 additional chargers via optimized site layout (formerly Centenario Hub)."
+      },
+      {
+        "title": "Destination Sites",
+        "body": "5 new chargers signed. Total: 686 signed, 465 operational, 221 pending installation."
+      },
+      {
+        "title": "Watts App - User Growth",
+        "body": "RAU +13.6% to 5,921; MAU +16.6% to 8,150, driven by +25% increase in NAU."
+      }
+    ],
+    "lowlights": [
+      {
+        "title": "Pre-Development - Home Depot",
+        "body": "Unable to secure account; operations team declined dedicated parking spaces for charging."
+      },
+      {
+        "title": "Commercial Delays",
+        "body": "Cost estimation bottlenecks remain structural. Prolonged delays may create relationship risk with certain hosts."
+      },
+      {
+        "title": "Permitting Delays",
+        "body": "Ongoing delays for Merida 77, Mexico-Toluca, Mosqueta, Rio Mississippi. Parallel pre-construction process shortens critical path by 6-8 weeks."
+      },
+      {
+        "title": "Competition - Orange Energy (DiDi subsidiary)",
+        "body": "Launching in Mexico: first CDMX hub (500 m2, 6 GBT chargers), ~MXN $9.28/kWh, waived activation fee. Asset-light model. Meeting scheduled April."
+      },
+      {
+        "title": "Monterrey - Competitive Landscape",
+        "body": "Fazt leads with 9 sites at ~MXN $7.33/kWh. Strategy: lower capex/opex hub designs and cost-efficient locations."
+      },
+      {
+        "title": "Watts - Infrastructure Constraints",
+        "body": "Onboarding 150+ connectors caused latency issues and two ~1-hour outages. Actions underway to ensure platform scalability."
+      }
+    ]
+  },
+  "Apr-26": {
+    "highlights": [
+      {
+        "title": "Utilization",
+        "body": "Weighted avg. utilization reached 17.6% (-242 bps MoM, +297 bps vs. Budget). DAE: 41.7% (-229 bps); Anchored LTO: 18.2% (-228 bps, +228 bps vs. Budget); Destination: 5.2% (+20 bps, +118 bps vs. Budget)."
+      },
+      {
+        "title": "VCN Revenue (ex. DAE)",
+        "body": "Revenues (excl. VAT) increased +2.3% MoM, reaching MXN $13.1m. LTO / B2C / DiDi: 55.0% / 42.7% / 2.3%."
+      },
+      {
+        "title": "Signed Hub - Coapa, Calzada del Hueso (CDMX)",
+        "body": "20-year lease, 2,349 sqm greenfield in southern CDMX. Capacity: 2.6 MW, 38 DC 120 kW chargers."
+      },
+      {
+        "title": "COD - Mixcoac Hub (CDMX)",
+        "body": "22 chargers reached COD; BESS energization expected early June (formerly Periferico Hub)."
+      },
+      {
+        "title": "Dynamic Pricing - Early Results",
+        "body": "3 weeks into rollout at Aeropuerto, Petrarca, Roma. Off-peak throughput +4% to +27%; 11-24% of users migrating peak-to-off-peak; early habit formation confirmed."
+      },
+      {
+        "title": "Destination Sites",
+        "body": "8 new chargers signed. Total: 694 signed, 479 operational, 215 pending installation."
+      },
+      {
+        "title": "Watts App - User Growth",
+        "body": "RAU +8.65% to 6,433; MAU +7.87% to 8,792, driven by +6% increase in NAU."
+      }
+    ],
+    "lowlights": [
+      {
+        "title": "Roma Hub - Temporary Closure",
+        "body": "Roma Anchored Hub temporarily closed by INVEA (land-use classification inconsistency). Demand redirected to Mixcoac (~6 km) and Petrarca. Reopening pursued through legal proceedings and Ministry of Economy support."
+      },
+      {
+        "title": "Tijuana Market",
+        "body": "Challenging leasing: USD-denominated contracts, limited land availability, power constraints. Lost key lead to non-EV competitor. Engaging Colliers and strengthening local team."
+      },
+      {
+        "title": "Pre-Development - Monumental 1882 (GDL)",
+        "body": "Advanced negotiations fell through as landlord shifted strategy from leasing to asset sale."
+      },
+      {
+        "title": "Permitting Delays",
+        "body": "Ongoing delays for Carretera Mexico-Toluca, Merida 77, Rio Mississippi, Morones Prieto, Observatorio. Government engagement + streamlined pre-construction process (6-8 weeks faster)."
+      },
+      {
+        "title": "Destination Deployment",
+        "body": "14 chargers installed vs. 38 on budget. Backlog: 215 pending installation. Institutional deals progressing slower than expected."
+      },
+      {
+        "title": "El Globo",
+        "body": "Negotiations fell through (potential ride-hailing framework agreement) as landlord shifted focus to core business priorities."
+      },
+      {
+        "title": "Watts - DiDi Discount Bug",
+        "body": "Bug in DiDi discount logic during Dynamic Pricing POC caused ~MXN $45K in excess discounts over 15 days."
+      }
+    ]
+  },
+  "May-26": {
+    "highlights": [
+      {
+        "title": "Utilization",
+        "body": "Weighted avg. utilization reached 17.0% (-57 bps MoM, +298 bps vs. Budget). DAE: 35.5% (-616 bps); Anchored LTO: 18.0% (-24 bps, +129 bps vs. Budget); Destination: 5.6% (+38 bps, +187 bps vs. Budget)."
+      },
+      {
+        "title": "VCN Revenue (ex. DAE)",
+        "body": "Revenues (excl. VAT) increased +6.9% MoM, reaching MXN $14.0m. LTO / B2C / DiDi: 54.3% / 43.6% / 2.1%."
+      },
+      {
+        "title": "Signed Hub - Tlalnepantla, Filiberto (CDMX)",
+        "body": "15-year lease, 2,190 sqm warehouse site. Planned: 3.8 MW, 32 dual-connector DC chargers."
+      },
+      {
+        "title": "Signed Hub - Manuel Acuna 2790 (GDL)",
+        "body": "18-year lease, 907 sqm greenfield. Planned: 2.7 MW, 15 dual-connector DC chargers."
+      },
+      {
+        "title": "Uber Charging Agreement / B2C Loyalty Program",
+        "body": "Initiated discussions with Uber: (i) World Cup 8% charging discount; (ii) cashback loyalty program; (iii) long-term strategic partnership with hub integration and demand generation."
+      },
+      {
+        "title": "Dynamic Pricing - Maturation",
+        "body": "8 weeks into rollout. Off-peak session share: 27-30% (vs. 23-27% April). DP adopters: +69% revenue/user, +71% sessions/user vs. non-adopters. Repeat nocturnal users: 74.3% Aeropuerto, 73.7% Petrarca."
+      },
+      {
+        "title": "Watts App - User Growth",
+        "body": "RAU +6.4% to 6,847; MAU +7.2% to 9,422, driven by +9% increase in NAU."
+      }
+    ],
+    "lowlights": [
+      {
+        "title": "Roma Hub - Ongoing Closure",
+        "body": "Roma Anchored Hub remains temporarily closed by INVEA. Reopening pursued through legal proceedings and Ministry of Economy support."
+      },
+      {
+        "title": "Permitting Delays",
+        "body": "Ongoing delays for Merida 77, Rio Mississippi, Morones Prieto, Observatorio. Carretera Mexico-Toluca removed from risk list. Enhanced due diligence and intensified government engagement."
+      },
+      {
+        "title": "Mixcoac Hub - Access & Governance",
+        "body": "Primary access obstructed by ancillary infrastructure introduced during development. Recovery underway; stricter cross-functional approval processes implemented."
+      },
+      {
+        "title": "Destination Deployment",
+        "body": "Only 6 chargers installed vs. 37 on budget. Backlog: 223 pending installation. No destination deals signed in May."
+      },
+      {
+        "title": "Torre Acacia (MTY)",
+        "body": "Potential termination notice issued following temporary uptime breaches from third-party internet provider. Connectivity resolved; discussions progressing favorably toward withdrawing the notice."
+      },
+      {
+        "title": "Woolworth",
+        "body": "Advanced negotiation fell through due to lack of technical feasibility."
+      },
+      {
+        "title": "Watts - AWS Payment Outage",
+        "body": "May 7: 45-minute payment downtime caused by AWS outage affecting our payment processor."
+      }
+    ]
   }
 }
