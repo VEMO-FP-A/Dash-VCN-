@@ -608,7 +608,7 @@ footer.foot{margin-top:32px;padding-top:16px;border-top:1px solid var(--b);font-
 
 <footer class="foot">
   <div>VEMO · VCN · Strictly Private &amp; Confidential</div>
-  <div>build 2026-06-30 07:58</div>
+  <div>build 2026-07-01 12:29</div>
 </footer>
 
 <script>
@@ -666,6 +666,13 @@ document.querySelectorAll('.tab-bar button').forEach(b=>{
     b.classList.add('active');
     document.querySelector('.section[data-s="'+b.dataset.s+'"]').classList.add('active');
     window.dispatchEvent(new Event('resize'));
+    // Re-render P&L charts after tab becomes visible (display:none on init causes 0x0 canvas)
+    if(b.dataset.s === 'pl'){
+      setTimeout(function(){
+        try { renderPLBridge(); } catch(e){ console.warn('PLBridge re-render',e); }
+        try { renderPLCharts(); } catch(e){ console.warn('PLCharts re-render',e); }
+      }, 80);
+    }
   });
 });
 /* SUB-TABS */
@@ -1227,33 +1234,40 @@ function buildPLRows(simple){
   __ID_COUNTER = 0;
   let rows='';
   function emit(line, parentId, depth){
+    // Normalize: support both {k,l} (DAE style) and {key,label} (VCN style)
+    const _k = line.k || line.key;
+    const _l = line.l || line.label;
+    // Skip pre-computed percentage rows (shown in charts; wrong fmt in MXNm table)
+    if(line.isPct) return;
     // En Managerial view, ocultar Non-Op Net (y otras lineas non-recurrent)
-    if(PL_VIEW === 'managerial' && line.k && /^(non_op_net|non_op_revenue|non_op_expense)$/.test(line.k)) return;
+    if(PL_VIEW === 'managerial' && _k && /^(non_op_net|non_op_revenue|non_op_expense)$/.test(_k)) return;
     if(line.sep){ const cspan = 15 + (PL_SHOW_HISTORIC ? (LI+1) : 0); rows+='<tr class="sep"><td colspan="'+cspan+'"></td></tr>'; return; }
     if(line.margin){
       // En margin rows, ajustar n (numerador) si la vista es managerial
       const n = (PL_VIEW === 'managerial' && line.n === 'net_income' && D.net_income_ex_non_rec && D.net_income_ex_non_rec.length) ? 'net_income_ex_non_rec'
                : (PL_VIEW === 'managerial' && line.n === 'ebitda' && D.ebitda_ex_non_rec && D.ebitda_ex_non_rec.length) ? 'ebitda_ex_non_rec'
                : (PL_VIEW === 'accounting' && line.n === 'net_income' && D.accounting_net_income && D.accounting_net_income.length) ? 'accounting_net_income'
-               : line.n;
-      rows += rowMargin(line.l, n, line.d);
+               : (line.n || _k);
+      rows += rowMargin(_l, n, line.d || 'revenue');
       return;
     }
     const hasChildren = line.children && line.children.length && !simple;
     const id = hasChildren? nextId() : null;
+    // depth=1 OR level=1 for indent (VCN PL_HIER uses level property)
+    const _depth = depth || line.level || 0;
     const opts = {
       subtotal: line.subtotal,
       invert: line.invert,
-      indent: depth===1,
-      indent2: depth===2,
+      indent: _depth===1,
+      indent2: _depth>=2,
       exp: hasChildren,
       id: id,
       parent: parentId,
       child: !!parentId,
     };
     // Aplicar plViewKey al row key (para EBITDA y net_income)
-    const useKey = (typeof plViewKey === 'function') ? plViewKey(line.k) : line.k;
-    rows += rowMm(useKey, line.l, opts);
+    const useKey = (typeof plViewKey === 'function') ? plViewKey(_k) : _k;
+    rows += rowMm(useKey, _l, opts);
     if(hasChildren){
       for(const c of line.children) emit(c, id, depth+1);
     }
