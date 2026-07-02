@@ -419,9 +419,6 @@ footer.foot{margin-top:32px;padding-top:16px;border-top:1px solid var(--b);font-
   <div id="kpi-cards-grid" class="kpi-grid"></div>
   <div style="font-size:10.5px;color:var(--tx3);font-style:italic;margin:-6px 0 8px 0;letter-spacing:0.02em">View: <b>Managerial</b> (Net Income &amp; EBITDA exclude non-recurring / FX / intercompany)</div>
 
-  <!-- ===== KPIs FINANCIEROS ===== -->
-  <div class="vemo-section-title" style="margin-top:24px">Financial <b>KPIs</b></div>
-  <div id="fin-kpi-grid" class="fin-kpi-grid"></div>
   <!-- Chart full-width con dropdown para elegir KPI -->
   <div class="chart-card" style="margin-bottom:22px">
     <div class="chart-hd" style="gap:12px">
@@ -608,7 +605,7 @@ footer.foot{margin-top:32px;padding-top:16px;border-top:1px solid var(--b);font-
 
 <footer class="foot">
   <div>VEMO · VCN · Strictly Private &amp; Confidential</div>
-  <div>build 2026-07-01 12:33</div>
+  <div>build 2026-07-02 09:20</div>
 </footer>
 
 <script>
@@ -1929,16 +1926,22 @@ function renderPLBridge(){
     return sum(arr(vk), s, e);
   }
   // Steps: Revenue (+), Opex (-), SGA (-), DA (-), Interest (-), Taxes (-) → NI
+  // Only include steps where data is available (non-zero)
+  function hasData(key){ return arr(key).some(vv=>vv!=null&&vv!=0); }
   const steps = [
     {l:'Revenue', val:v('revenue'), type:'in'},
     {l:'Opex', val:v('opex'), type:'out'},
     {l:'Gross Profit', type:'subtotal', val:v('gross_profit')},
     {l:'SG&A', val:v('corporate_expenses'), type:'out'},
     {l:'EBITDA', type:'subtotal', val:v('ebitda')},
-    {l:'D&A', val:v('da'), type:'out'},
-    {l:'EBIT', type:'subtotal', val:v('ebit')},
-    {l:'Interest', val:v('interest_expense'), type:'out'},
   ];
+  // D&A + EBIT only if D&A has data
+  if(hasData('da')){
+    steps.push({l:'D&A', val:v('da'), type:'out'});
+    if(hasData('ebit')) steps.push({l:'EBIT', type:'subtotal', val:v('ebit')});
+  }
+  // Interest only if has data
+  if(hasData('interest_expense')) steps.push({l:'Interest', val:v('interest_expense'), type:'out'});
   // En Managerial NO mostrar Non-Op (está excluido)
   if(PL_VIEW !== 'managerial'){
     const nonOp = v('non_op_net');
@@ -2018,7 +2021,7 @@ function renderPLCharts(){
   const root=document.getElementById('pl-charts');
   let html='';
   PL_LINES.forEach((ln,i)=>{
-    if(!arr(ln.k).length) return;
+    if(!arr(ln.k).some(v=>v!=null&&v!=0)) return;
     const fy25=sum(arr(ln.k),0,11), ytd26=sum(arr(ln.k),YTD_START,YTD_END);
     const stat='FY25: '+fmtMm(fy25)+' · YTD: '+fmtMm(ytd26);
     html+='<div class="chart-card">'+
@@ -4549,7 +4552,6 @@ function init(){
   try { renderAlerts(); } catch(e){ console.warn('renderAlerts',e); }
   try { renderKPICards(); } catch(e){ console.warn('renderKPICards',e); }
   try { setTimeout(renderKPISparklines, 50); } catch(e){ console.warn('renderKPISparklines',e); }
-  try { renderFinKPISection(); } catch(e){ console.warn('renderFinKPISection',e); }
   try { renderExecKpiChart(); } catch(e){ console.warn('renderExecKpiChart',e); }
   try { renderPLVemo('pl-vemo',{simple:true,title:'VCN – <b>P&L Summary</b>'}); } catch(e){ console.warn('renderPLVemo simple',e); }
   try { renderAllRatios(); } catch(e){ console.warn('renderAllRatios',e); }
