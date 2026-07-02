@@ -459,10 +459,10 @@ footer.foot{margin-top:32px;padding-top:16px;border-top:1px solid var(--b);font-
   <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:8px">
     <div class="stabs" id="ratios-stabs">
       <button class="active" data-sub="main">Main KPIs</button>
-      <button data-sub="op">Operational</button>
+      <button data-sub="net-kpi">Network KPIs</button>
+      <button data-sub="perf-kpi">Main Performance KPIs</button>
       <button data-sub="cost">Costs</button>
       <button data-sub="fin">Financial</button>
-
       <button data-sub="calc">Calculator</button>
     </div>
     <div class="stabs" id="ratios-range">
@@ -471,7 +471,8 @@ footer.foot{margin-top:32px;padding-top:16px;border-top:1px solid var(--b);font-
     </div>
   </div>
   <div class="rsub active" data-sub="main"><div id="rat-main"></div></div>
-  <div class="rsub" data-sub="op"><div id="rat-op"></div></div>
+  <div class="rsub" data-sub="net-kpi"><div id="rat-net-kpi"></div></div>
+  <div class="rsub" data-sub="perf-kpi"><div id="rat-perf-kpi"></div></div>
   <div class="rsub" data-sub="cost"><div id="rat-cost"></div></div>
   <div class="rsub" data-sub="fin"><div id="rat-fin"></div></div>
 
@@ -605,7 +606,7 @@ footer.foot{margin-top:32px;padding-top:16px;border-top:1px solid var(--b);font-
 
 <footer class="foot">
   <div>VEMO · VCN · Strictly Private &amp; Confidential</div>
-  <div>build 2026-07-02 09:20</div>
+  <div>build 2026-07-02 12:18</div>
 </footer>
 
 <script>
@@ -726,24 +727,40 @@ function renderAlerts(){
 
 /* ============ 13 KPI CARDS ============ */
 const KPI13=[
-  {l:'Conectores Instalados',   keys:['total_connectors','operational_vehicles'], unit:'#',    type:'num', agg:'eop', fmt:'int', better:'up'},
-  {l:'Throughput (kWh)',         keys:['sessions_total'],                          unit:'kWh',  type:'num', agg:'sum', fmt:'k',   better:'up'},
-  {l:'Uptime de Red',           keys:['uptime_pct'],                              unit:'%',    type:'pct', agg:'avg',             better:'up'},
-  {l:'Tasa de Utilización',     keys:['utilization'],                             unit:'%',    type:'pct', agg:'avg',             better:'up'},
-  {l:'Revenue / kWh',           keys:['rev_per_kwh'],                             unit:'MXN$', type:'num', agg:'avg', fmt:'n2',  better:'up'},
-  {l:'GP / kWh',                keys:['gross_profit_kwh'],                        unit:'MXN$', type:'num', agg:'avg', fmt:'n2',  better:'up'},
-  {l:'CAPEX / kW Instalado',    keys:['capex_kw'],                                unit:'MXN$', type:'num', agg:'avg', fmt:'int', better:'down'},
+  {l:'Network Active Connectors', keys:['total_connectors','operational_vehicles'], unit:'#',           type:'num', agg:'eop', fmt:'int', better:'up'},
+  {l:'Throughput',                keys:['sessions_total'],                          unit:'MWh',          type:'num', agg:'sum', fmt:'k',   better:'up'},
+  {l:'Network Utilization',       keys:['utilization'],                             unit:'%',            type:'pct', agg:'avg',             better:'up'},
+  {l:'Avg. Revenue per kWh',      keys:['rev_per_kwh'],                             unit:'MXN$/kWh',     type:'num', agg:'avg', fmt:'n2',  better:'up', fallbackToPrev:true},
+  {l:'GP per kWh',                keys:['gross_profit_kwh'],                        unit:'MXN$/kWh',     type:'num', agg:'avg', fmt:'n2',  better:'up', fallbackToPrev:true},
+  {l:'Technical Uptime',          keys:['uptime_pct'],                              unit:'%',            type:'pct', agg:'avg',             better:'up'},
+  {l:'CAPEX / kW Installed',      keys:['capex_kw'],                                unit:'MXN$/kW',      type:'num', agg:'avg', fmt:'int', better:'down'},
+  {l:'Revenue',                   keys:['revenue'],                                 unit:'MXNm',         type:'num', agg:'sum', fmt:'mm',  better:'up'},
+  {l:'EBITDA',                    keys:['ebitda'],                                  unit:'MXNm',         type:'num', agg:'sum', fmt:'mm',  better:'up'},
 ];
 function arrCand(keys){ for(const k of keys){ if(D[k]&&D[k].length) return D[k]; } return []; }
 function barrCand(keys){ for(const k of keys){ const c=D['budget_'+k]||D[k+'_budget']; if(c&&c.length) return c; } return []; }
 function fmtVal(v,ki){
   if(v==null||isNaN(v)) return '—';
   if(ki.type==='pct') return (v*100).toFixed(1)+'%';
+  if(ki.fmt==='mm') return fmtMm(v)+'M';
   if(ki.fmt==='int') return fmtInt(v);
   if(ki.fmt==='k') return Math.round(v).toLocaleString();
   if(ki.fmt==='n1') return fmtN(v,1);
   if(ki.fmt==='n2') return fmtN(v,2);
   return v.toFixed(1);
+}
+// Like getVal but scans back to last non-zero when current is 0 (for sparse ratio KPIs)
+function getDisplayVal(ki, idx){
+  let v = getVal(ki, idx);
+  if((v === 0 || v == null) && ki.fallbackToPrev){
+    const A = arrCand(ki.keys);
+    for(let i = idx-1; i >= 0; i--){
+      const vv = ki.agg==='eop'? eop(A,i) : (ki.agg==='avg'? avg(A,i,i) : sum(A,i,i));
+      if(vv != null && vv !== 0 && !isNaN(vv)) return vv;
+    }
+    return null;
+  }
+  return v;
 }
 function devPct(a,b){ if(!b||isNaN(b)) return null; return (a-b)/Math.abs(b)*100; }
 function devBps(a,b){ if(b==null||isNaN(b)) return null; return (a-b)*10000; }
@@ -765,8 +782,8 @@ function renderKPICards(){
   if(!el) return;
   el.innerHTML = KPI13.map((ki,i)=>{
     const A=arrCand(ki.keys), B=barrCand(ki.keys);
-    const val = getVal(ki, CUR);
-    const valPrev = getVal(ki, PREV);
+    const val = getDisplayVal(ki, CUR);
+    const valPrev = getDisplayVal(ki, PREV);
     const valBud = B.length? (ki.agg==='eop'?eop(B,CUR):(ki.agg==='avg'?avg(B,CUR,CUR):sum(B,CUR,CUR))) : 0;
 
     const momPct=devPct(val,valPrev), momBps=devBps(val,valPrev);
@@ -807,8 +824,10 @@ function renderKPISparklines(){
     const vals = [], buds = [];
     for(let j=start; j<=LI; j++){
       labels.push(mlblShort(j));
-      const v = ki.agg==='eop'? eop(A,j) : (ki.agg==='avg'? avg(A,j,j) : sum(A,j,j));
-      vals.push(ki.type==='pct' ? (v*100) : v);
+      let v = ki.agg==='eop'? eop(A,j) : (ki.agg==='avg'? avg(A,j,j) : sum(A,j,j));
+      // Treat 0 as null for fallbackToPrev KPIs (sparse ratios without data)
+      if(ki.fallbackToPrev && (v===0||v==null)) v = null;
+      vals.push(v==null ? null : (ki.type==='pct' ? (v*100) : v));
       const bv = B.length ? (ki.agg==='eop'? eop(B,j) : (ki.agg==='avg'? avg(B,j,j) : sum(B,j,j))) : null;
       buds.push(bv!=null && bv!==0 ? (ki.type==='pct'?(bv*100):bv) : null);
     }
@@ -1227,6 +1246,24 @@ function plHeaderRows(title){
 let __ID_COUNTER = 0;
 function nextId(){ return 'r'+(++__ID_COUNTER); }
 
+// Lines shown in Executive Summary P&L (mirrors DAE structure)
+const PL_SUMMARY_LINES = [
+  {key:'revenue',           label:'Revenue',           sign:1,  bold:true},
+  {key:'cogs_total',        label:'COGS',              sign:-1, bold:true},
+  {key:'gross_profit',      label:'Gross Profit',      sign:1,  bold:true, subtotal:true},
+  {margin:true, l:'Gross Margin %',      n:'gross_profit',      d:'revenue'},
+  {key:'opex',              label:'OPEX',              sign:-1, bold:true},
+  {key:'corporate_expenses',label:'SG&A',              sign:-1, bold:true},
+  {key:'ebitda',            label:'EBITDA',            sign:1,  bold:true, subtotal:true},
+  {margin:true, l:'EBITDA Margin %',     n:'ebitda',            d:'revenue'},
+  {key:'da',                label:'D&A',               sign:-1, bold:false},
+  {key:'interest_expense',  label:'Interest Expense',  sign:-1, bold:false},
+  {key:'ebt',               label:'EBT',               sign:1,  bold:true, subtotal:true},
+  {key:'taxes',             label:'Taxes',             sign:-1, bold:false},
+  {key:'net_income',        label:'Net Income',        sign:1,  bold:true, subtotal:true},
+  {margin:true, l:'Net Income Margin %', n:'net_income',        d:'revenue'},
+];
+
 function buildPLRows(simple){
   __ID_COUNTER = 0;
   let rows='';
@@ -1234,8 +1271,9 @@ function buildPLRows(simple){
     // Normalize: support both {k,l} (DAE style) and {key,label} (VCN style)
     const _k = line.k || line.key;
     const _l = line.l || line.label;
-    // Skip pre-computed percentage rows (shown in charts; wrong fmt in MXNm table)
+    // Skip pre-computed percentage rows in full P&L (margin rows are handled via line.margin)
     if(line.isPct) return;
+    const _depth = depth || line.level || 0;
     // En Managerial view, ocultar Non-Op Net (y otras lineas non-recurrent)
     if(PL_VIEW === 'managerial' && _k && /^(non_op_net|non_op_revenue|non_op_expense)$/.test(_k)) return;
     if(line.sep){ const cspan = 15 + (PL_SHOW_HISTORIC ? (LI+1) : 0); rows+='<tr class="sep"><td colspan="'+cspan+'"></td></tr>'; return; }
@@ -1250,8 +1288,6 @@ function buildPLRows(simple){
     }
     const hasChildren = line.children && line.children.length && !simple;
     const id = hasChildren? nextId() : null;
-    // depth=1 OR level=1 for indent (VCN PL_HIER uses level property)
-    const _depth = depth || line.level || 0;
     const opts = {
       subtotal: line.subtotal,
       invert: line.invert,
@@ -1269,7 +1305,8 @@ function buildPLRows(simple){
       for(const c of line.children) emit(c, id, depth+1);
     }
   }
-  for(const ln of PL_HIER) emit(ln, null, 0);
+  const src = simple ? PL_SUMMARY_LINES : PL_HIER;
+  for(const ln of src) emit(ln, null, 0);
   return rows;
 }
 
@@ -1317,16 +1354,26 @@ function renderPLVemo(targetId, opts){
 // Cada sub-tab: lista de KPI rows
 const RATIOS = {
   main: KPI13,  // KPIs principales del Executive Summary
-  op: [
-    // Operación de red — solo métricas con datos reales en el Excel
-    {l:'Conectores Instalados',  keys:['total_connectors','operational_vehicles'], unit:'#',    type:'num', agg:'eop', fmt:'int'},
-    {l:'Throughput kWh',          keys:['sessions_total'],                          unit:'kWh',  type:'num', agg:'sum', fmt:'k'},
-    {l:'Rev / Conector Instalado',keys:['rev_per_connector'],                       unit:'MXN$',  type:'num', agg:'avg', fmt:'int'},
-    {l:'Uptime de Red',          keys:['uptime_pct'],                              unit:'%',    type:'pct', agg:'avg'},
-    {l:'Tasa de Utilización',    keys:['utilization'],                             unit:'%',    type:'pct', agg:'avg'},
-    {l:'Revenue / kWh',          keys:['rev_per_kwh'],                             unit:'MXN$', type:'num', agg:'avg', fmt:'n2'},
-    {l:'GP / kWh',               keys:['gross_profit_kwh'],                        unit:'MXN$', type:'num', agg:'avg', fmt:'n2'},
-    {l:'CAPEX / kW Instalado',   keys:['capex_kw'],                                unit:'MXN$', type:'num', agg:'avg', fmt:'int'},
+  net_kpi: [
+    // Network KPIs — Portfolio, Connectors, Capacity
+    {l:'Network Active Connectors',  keys:['total_connectors'],   unit:'#',        type:'num', agg:'eop', fmt:'int'},
+    {l:'Technical Uptime',           keys:['uptime_pct'],         unit:'%',        type:'pct', agg:'avg'},
+    {l:'CAPEX / kW Installed',       keys:['capex_kw'],           unit:'MXN$/kW',  type:'num', agg:'avg', fmt:'int'},
+    {l:'Revenue',                    keys:['revenue'],             unit:'MXNm',     type:'num', agg:'sum', fmt:'mm'},
+    {l:'Gross Profit',               keys:['gross_profit'],        unit:'MXNm',     type:'num', agg:'sum', fmt:'mm'},
+    {l:'EBITDA',                     keys:['ebitda'],              unit:'MXNm',     type:'num', agg:'sum', fmt:'mm'},
+    {l:'Net Income',                 keys:['net_income'],          unit:'MXNm',     type:'num', agg:'sum', fmt:'mm'},
+  ],
+  perf_kpi: [
+    // Main Performance KPIs
+    {l:'Throughput',                 keys:['sessions_total'],       unit:'MWh',       type:'num', agg:'sum', fmt:'k'},
+    {l:'Network Utilization',        keys:['utilization'],          unit:'%',         type:'pct', agg:'avg'},
+    {l:'Avg. Revenue per kWh',       keys:['rev_per_kwh'],          unit:'MXN$/kWh',  type:'num', agg:'avg', fmt:'n2'},
+    {l:'GP per kWh',                 keys:['gross_profit_kwh'],     unit:'MXN$/kWh',  type:'num', agg:'avg', fmt:'n2'},
+    {l:'Technical Uptime',           keys:['uptime_pct'],           unit:'%',         type:'pct', agg:'avg'},
+    {l:'Gross Margin',               keys:['gross_margin'],         unit:'%',         type:'pct', agg:'avg'},
+    {l:'EBITDA Margin',              keys:['ebitda_margin'],        unit:'%',         type:'pct', agg:'avg'},
+    {l:'NI Margin',                  keys:['ni_margin'],            unit:'%',         type:'pct', agg:'avg'},
   ],
   cost: [
     // Operating cost structure
@@ -1633,20 +1680,28 @@ function renderRatioCharts(containerId, chartDefs){
 // Mapeo charts por sub-tab
 const RATIO_CHARTS = {
   main: [
-    {k:'revenue',       l:'Revenue',            type:'num', agg:'sum', fmt:'n1'},
-    {k:'gross_profit',  l:'Gross Profit',        type:'num', agg:'sum', fmt:'n1'},
-    {k:'ebitda',        l:'EBITDA',              type:'num', agg:'sum', fmt:'n1'},
-    {k:'net_income',    l:'Net Income',          type:'num', agg:'sum', fmt:'n1'},
-    {k:'total_connectors', l:'Conectores',       type:'num', agg:'eop', fmt:'int'},
-    {k:'utilization',   l:'Utilización',         type:'pct', agg:'avg'},
+    {k:'total_connectors', l:'Active Connectors',    type:'num', agg:'eop', fmt:'int'},
+    {k:'sessions_total',   l:'Throughput',            type:'num', agg:'sum', fmt:'k'},
+    {k:'utilization',      l:'Network Utilization',   type:'pct', agg:'avg'},
+    {k:'rev_per_kwh',      l:'Revenue / kWh',         type:'num', agg:'avg', fmt:'n2'},
+    {k:'uptime_pct',       l:'Technical Uptime',      type:'pct', agg:'avg'},
+    {k:'gross_profit_kwh', l:'GP / kWh',              type:'num', agg:'avg', fmt:'n2'},
   ],
-  op: [
-    {k:'total_connectors', l:'Conectores Instalados', type:'num', agg:'eop', fmt:'int'},
-    {k:'sessions_total',   l:'Throughput (kWh)',       type:'num', agg:'sum', fmt:'k'},
-    {k:'utilization',      l:'Tasa de Utilización',    type:'pct', agg:'avg'},
-    {k:'uptime_pct',       l:'Uptime de Red',           type:'pct', agg:'avg'},
-    {k:'rev_per_kwh',      l:'Revenue / kWh',           type:'num', agg:'avg', fmt:'n2'},
-    {k:'gross_profit_kwh', l:'GP / kWh',                type:'num', agg:'avg', fmt:'n2'},
+  net_kpi: [
+    {k:'total_connectors', l:'Active Connectors',     type:'num', agg:'eop', fmt:'int'},
+    {k:'uptime_pct',       l:'Technical Uptime',      type:'pct', agg:'avg'},
+    {k:'capex_kw',         l:'CAPEX / kW',            type:'num', agg:'avg', fmt:'int'},
+    {k:'revenue',          l:'Revenue',               type:'num', agg:'sum', fmt:'n1'},
+    {k:'gross_profit',     l:'Gross Profit',          type:'num', agg:'sum', fmt:'n1'},
+    {k:'ebitda',           l:'EBITDA',                type:'num', agg:'sum', fmt:'n1'},
+  ],
+  perf_kpi: [
+    {k:'sessions_total',   l:'Throughput',            type:'num', agg:'sum', fmt:'k'},
+    {k:'utilization',      l:'Network Utilization',   type:'pct', agg:'avg'},
+    {k:'rev_per_kwh',      l:'Revenue / kWh',         type:'num', agg:'avg', fmt:'n2'},
+    {k:'gross_profit_kwh', l:'GP / kWh',              type:'num', agg:'avg', fmt:'n2'},
+    {k:'uptime_pct',       l:'Technical Uptime',      type:'pct', agg:'avg'},
+    {k:'gross_margin',     l:'Gross Margin %',        type:'pct', agg:'avg'},
   ],
   cost: [
     {k:'energy_costs',        l:'Costo de Energía',    type:'num', agg:'sum', fmt:'n1'},
@@ -1680,7 +1735,8 @@ function renderAllRatios(){
     renderRatioExpandable(targetId, list, '');
   }
   renderPair('rat-main', RATIOS.main, RATIO_CHARTS.main, 'VCN – <b>Main KPIs</b>');
-  renderPair('rat-op',   RATIOS.op,   RATIO_CHARTS.op,   'VCN – <b>Operational</b>');
+  renderPair('rat-net-kpi',  RATIOS.net_kpi,  RATIO_CHARTS.net_kpi,  'VCN – <b>Network KPIs</b>');
+  renderPair('rat-perf-kpi', RATIOS.perf_kpi, RATIO_CHARTS.perf_kpi, 'VCN – <b>Main Performance KPIs</b>');
   renderPair('rat-cost', RATIOS.cost, RATIO_CHARTS.cost,  'VCN – <b>Cost Structure</b>');
   renderPair('rat-fin',  RATIOS.fin,  RATIO_CHARTS.fin,  'VCN – <b>Financial Ratios</b>');
 
@@ -1759,7 +1815,6 @@ function makeLineChart(canvasId,label,data,opts){
   }
   // FIX: Trim X-axis al horizonte real (LI + 3 meses adelante max)
   const MAX_X = Math.min(D.months.length, LI + 4); // LI + 3 ahead + cushion
-  const labels=D.months.slice(0, MAX_X).map((_,i)=>mlblShort(i));
   const SPARSE_KEYS_JS = new Set(['total_connectors','sessions_total','utilization','uptime_pct','rev_per_kwh','gross_profit_kwh','capex_kw','operational_connectors','sessions_per_connector','app_users','b2b_clients','active_sites','states_covered']);
   const slice=(a,k)=>{
     const raw=(a||[]).slice(0,LI+1);
@@ -1769,8 +1824,14 @@ function makeLineChart(canvasId,label,data,opts){
     return cleaned.concat(new Array(Math.max(0,MAX_X-LI-1)).fill(null));
   };
   const main=slice(data, opts.sparseKey||null);
+  // Trim x-axis start to first non-null value (avoids blank leading months for sparse KPIs)
+  let xStart = 0;
+  for(let i=0; i<main.length; i++){ if(main[i]!=null){ xStart=i; break; } }
+  const labels=D.months.slice(xStart, MAX_X).map((_,i)=>mlblShort(i+xStart));
+  // Trim all datasets to xStart so x-axis matches non-null data range
+  const mainTrimmed = main.slice(xStart);
   const datasets=[{
-    label,data:main,
+    label,data:mainTrimmed,
     borderColor:'#11ABAB',backgroundColor:'rgba(123,218,218,0.30)',
     fill:'origin',tension:0.32,borderWidth:2,spanGaps:false,
     pointRadius:2.5,pointBackgroundColor:'#168888',pointBorderColor:'#168888',pointHoverRadius:5
@@ -1782,21 +1843,21 @@ function makeLineChart(canvasId,label,data,opts){
     let bud2026Start = 0;
     for(let i=0; i<D.months.length; i++){ if(D.months[i] && D.months[i].startsWith('2026-01')){ bud2026Start=i; break; } }
     const b = [];
-    for(let i=0; i<MAX_X; i++){
+    for(let i=xStart; i<MAX_X; i++){
       const v = opts.budget[i];
       if(i < bud2026Start || i > maxIdx || v == null || v === 0) b.push(null);
       else b.push(v);
     }
     datasets.push({label:'Budget',data:b,borderColor:'#1F5454',backgroundColor:'transparent',borderDash:[6,4],fill:false,tension:0.20,borderWidth:1.5,pointRadius:0,pointHoverRadius:3,spanGaps:false});
   }
-  if(opts.projection&&main.filter(v=>v!=null).length>=3){
-    const proj=new Array(MAX_X).fill(null);
-    const last3=main.slice(LI-2,LI+1).filter(v=>v!=null);
+  if(opts.projection&&mainTrimmed.filter(v=>v!=null).length>=3){
+    const proj=new Array(MAX_X-xStart).fill(null);
+    const last3=mainTrimmed.slice(LI-xStart-2,LI-xStart+1).filter(v=>v!=null);
     const ma=last3.length?last3.reduce((a,b)=>a+b,0)/last3.length:0;
-    for(let i=LI+1;i<Math.min(LI+4,MAX_X);i++) proj[i]=ma;
+    for(let i=LI-xStart+1;i<Math.min(LI-xStart+4,MAX_X-xStart);i++) proj[i]=ma;
     datasets.push({label:'Projection (3M MA)',data:proj,borderColor:'#7BDADA',backgroundColor:'rgba(123,218,218,0.15)',borderDash:[3,3],fill:false,tension:0.32,borderWidth:1.5,pointRadius:2,pointBackgroundColor:'#7BDADA'});
   }
-  let yr=smartYRange(main);
+  let yr=smartYRange(mainTrimmed);
   if(opts.wideY && yr.min !== undefined && yr.max !== undefined){
     yr = {min: 0, max: yr.max};
   }
@@ -1807,9 +1868,9 @@ function makeLineChart(canvasId,label,data,opts){
   };
   if(opts.marginData && opts.marginData.length){
     // Agregar dataset de margin en eje secundario (yMargin)
-    const mSlice = (opts.marginData||[]).slice(0,MAX_X);
+    const mSlice = (opts.marginData||[]).slice(xStart, MAX_X);
     // truncar a actuales (LI+1) para no proyectar margen
-    const mFinal = mSlice.map((v,i) => i <= LI ? v : null);
+    const mFinal = mSlice.map((v,i) => (i+xStart) <= LI ? v : null);
     datasets.push({
       label:opts.marginLabel||'Margin %',
       data:mFinal,
